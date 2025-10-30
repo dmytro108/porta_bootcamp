@@ -1,12 +1,30 @@
 /* Delete the tables if they already exist */
+drop table if exists Rating;
 drop table if exists Movie;
 drop table if exists Reviewer;
-drop table if exists Rating;
 
-/* Create the schema for our tables */
-create table Movie(mID int, title text, year int, director text);
-create table Reviewer(rID int, name text);
-create table Rating(rID int, mID int, stars int, ratingDate date);
+/* Create the schema for our tables with proper constraints */
+create table Movie(
+    mID int PRIMARY KEY, 
+    title text NOT NULL, 
+    year int NOT NULL CHECK (year >= 1888 AND year <= 2030), 
+    director text
+);
+
+create table Reviewer(
+    rID int PRIMARY KEY, 
+    name text NOT NULL
+);
+
+create table Rating(
+    rID int, 
+    mID int, 
+    stars int NOT NULL CHECK (stars >= 1 AND stars <= 5), 
+    ratingDate date,
+    PRIMARY KEY (rID, mID, ratingDate),
+    FOREIGN KEY (rID) REFERENCES Reviewer(rID),
+    FOREIGN KEY (mID) REFERENCES Movie(mID)
+);
 
 /* Populate the tables with our data */
 insert into Movie values(101, 'Gone with the Wind', 1939, 'Victor Fleming');
