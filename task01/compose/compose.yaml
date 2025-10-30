@@ -1,0 +1,66 @@
+###############################################
+# LAMP stack with Nagios monitoring
+#
+###############################################
+
+networks:
+  porta01:
+    driver: bridge
+
+volumes:
+  mysql_data:
+
+
+services:
+
+### Frontend Apache + PHP
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../src:/var/www/html
+    networks:
+      - porta01
+    ports:
+      - "9022:80"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSW}
+
+### MySQL database
+  db:
+    image: mysql:8.0
+    volumes:
+      - ../db:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    networks:
+      - porta01
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSW}
+      - MYSQL_DATABASE=${DB_NAME}
+
+#  db-replica:
+#    image:
+#    volumes:
+#    networks:
+#     - porta01
+#   depends_on:
+#      - db-master
+#    environment:
+
+### Monitoring with Nagios
+#  monitoring:
+#    image:
+#    volumes:
+#    networks:
+#      - porta01
+#    depends_on:
+#      - web
+#    environment:
+
+
