@@ -47,14 +47,14 @@ insert into Reviewer values(208, 'Ashley White');
 
 insert into Rating values(201, 101, 2, '2011-01-22');
 insert into Rating values(201, 101, 4, '2011-01-27');
-insert into Rating values(202, 106, 4, null);
+insert into Rating values(202, 106, 4, '2011-01-20');
 insert into Rating values(203, 103, 2, '2011-01-20');
 insert into Rating values(203, 108, 4, '2011-01-12');
 insert into Rating values(203, 108, 2, '2011-01-30');
 insert into Rating values(204, 101, 3, '2011-01-09');
 insert into Rating values(205, 103, 3, '2011-01-27');
 insert into Rating values(205, 104, 2, '2011-01-22');
-insert into Rating values(205, 108, 4, null);
+insert into Rating values(205, 108, 4, '2011-01-20');
 insert into Rating values(206, 107, 3, '2011-01-15');
 insert into Rating values(206, 106, 5, '2011-01-19');
 insert into Rating values(207, 107, 5, '2011-01-20');

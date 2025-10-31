@@ -8,8 +8,8 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
-
+  data_master:
+  data_replica:
 
 services:
 
@@ -25,33 +25,49 @@ services:
     ports:
       - "9022:80"
     depends_on:
-      - db
+      - db-replica
     environment:
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=${DB_MASTER_HOST}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSW}
 
 ### MySQL database
-  db:
+  db-master:
     image: mysql:8.0
     volumes:
-      - ../db:/docker-entrypoint-initdb.d
-      - mysql_data:/var/lib/mysql
+      - ../db/config/master.cnf:/etc/mysql/my.cnf
+      - ../db/master:/docker-entrypoint-initdb.d
+      - data_master:/var/lib/mysql
+    #command: tail -f /dev/null
     networks:
       - porta01
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSW}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSW}
       - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSW}
+      - REPLICA_USER=${REPLICA_USER}
+      - REPLICA_PASSWORD=${REPLICA_PASSWORD}      
 
-#  db-replica:
-#    image:
-#    volumes:
-#    networks:
-#     - porta01
-#   depends_on:
-#      - db-master
-#    environment:
+  db-replica:
+    image: mysql:8.0
+    volumes:
+      - ../db/config/replica.cnf:/etc/mysql/my.cnf
+      - ../db/replica:/docker-entrypoint-initdb.d
+      - data_replica:/var/lib/mysql
+    networks:
+      - porta01
+    #command: tail -f /dev/null
+    depends_on:
+      - db-master
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSW}
+      - MYSQL_DATABASE=${DB_NAME} 
+      - DB_MASTER_HOST=${DB_MASTER_HOST}
+      - REPLICA_USER=${REPLICA_USER}
+      - REPLICA_PASSWORD=${REPLICA_PASSWORD}
+       
 
 ### Monitoring with Nagios
 #  monitoring:

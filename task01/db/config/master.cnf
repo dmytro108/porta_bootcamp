@@ -1,0 +1,16 @@
+[mysqld]
+server-id=1
+log_bin=mysql-bin
+binlog_format=ROW
+gtid_mode=ON
+enforce_gtid_consistency=ON
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+relay_log_recovery=ON
+log_slave_updates=ON
+sync_binlog=1
+
+# plugin_load_add=semisync_master=semisync_master.so
+# plugin_load_add=semisync_slave=semisync_slave.so
+# rpl_semi_sync_master_enabled=1
+# rpl_semi_sync_master_timeout=1000
