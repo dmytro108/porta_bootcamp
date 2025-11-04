@@ -26,6 +26,8 @@ Familiarize yourself with the basics of Docker and Docker Compose:
 ```shell
 # Git
 sudo dnf install git
+git config user.email "dmitry.fedunets@gmail.com"
+git config user.name "Dmitry Fedunets"
 
 # Docker
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo

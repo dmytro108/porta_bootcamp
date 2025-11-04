@@ -1,17 +1,72 @@
 <?php
+/**
+ * Logger function - writes to stderr (console/Docker logs)
+ */
+function logDbAction($message) {
+    $timestamp = date('Y-m-d H:i:s');
+    $logMessage = "[{$timestamp}] {$message}\n";
+    
+    // Write to stderr which goes to console/Docker logs, not to the web page
+    file_put_contents('php://stderr', $logMessage);
+}
+
+/**
+ * Create database connection
+ */
+function createDbConnection($host, $dbname, $username, $password, $type) {
+    try {
+        logDbAction("Connecting to {$type} server: {$host}");
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        logDbAction("Successfully connected to {$type} server: {$host}");
+        return $pdo;
+    } catch (PDOException $e) {
+        logDbAction("ERROR: Failed to connect to {$type} server: {$host} - " . $e->getMessage());
+        die("Connection failed: " . $e->getMessage());
+    }
+}
+
+/**
+ * Execute a read query on slave server
+ */
+function executeReadQuery($pdo_slave, $query, $params = [], $fetchMode = 'all') {
+    logDbAction("SLAVE READ: Executing SELECT query on replica server");
+    $stmt = $pdo_slave->prepare($query);
+    $stmt->execute($params);
+    
+    if ($fetchMode === 'column') {
+        $result = $stmt->fetchColumn();
+    } elseif ($fetchMode === 'all') {
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $result = $stmt;
+    }
+    
+    logDbAction("SLAVE READ: Query completed successfully");
+    return $result;
+}
+
+/**
+ * Execute a write query on master server
+ */
+function executeWriteQuery($pdo_master, $query, $params = []) {
+    logDbAction("MASTER WRITE: Executing INSERT/UPDATE query on master server");
+    $stmt = $pdo_master->prepare($query);
+    $stmt->execute($params);
+    logDbAction("MASTER WRITE: Query completed successfully");
+    return $stmt;
+}
+
 // Database configuration
-$host = $_ENV['DB_HOST'];
 $dbname = $_ENV['DB_NAME'];
 $username = $_ENV['DB_USER'];
 $password = $_ENV['DB_PASSWORD'];
+$master_host = $_ENV['DB_WRITE_HOST'];
+$slave_host = $_ENV['DB_READ_HOST'];
 
-// Create connection
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+// Create separate connections for master (write) and slave (read)
+$pdo_master = createDbConnection($master_host, $dbname, $username, $password, 'MASTER');
+$pdo_slave = createDbConnection($slave_host, $dbname, $username, $password, 'SLAVE');
 
 // Handle form submission for adding new rating
 if (($_POST['action'] ?? '') === 'add_rating') {
@@ -26,27 +81,41 @@ if (($_POST['action'] ?? '') === 'add_rating') {
             $error_message = "Stars must be between 1 and 5.";
         } else {
             try {
-                // Check if movie exists
-                $check_movie = $pdo->prepare("SELECT COUNT(*) FROM Movie WHERE mID = ?");
-                $check_movie->execute([$movie_id]);
-                if ($check_movie->fetchColumn() == 0) {
+                // Check if movie exists (read from slave)
+                $movie_count = executeReadQuery(
+                    $pdo_slave, 
+                    "SELECT COUNT(*) FROM Movie WHERE mID = ?", 
+                    [$movie_id], 
+                    'column'
+                );
+                
+                if ($movie_count == 0) {
                     $error_message = "Selected movie does not exist.";
                 } else {
-                    // Check if reviewer exists
-                    $check_reviewer = $pdo->prepare("SELECT COUNT(*) FROM Reviewer WHERE rID = ?");
-                    $check_reviewer->execute([$reviewer_id]);
-                    if ($check_reviewer->fetchColumn() == 0) {
+                    // Check if reviewer exists (read from slave)
+                    $reviewer_count = executeReadQuery(
+                        $pdo_slave, 
+                        "SELECT COUNT(*) FROM Reviewer WHERE rID = ?", 
+                        [$reviewer_id], 
+                        'column'
+                    );
+                    
+                    if ($reviewer_count == 0) {
                         $error_message = "Selected reviewer does not exist.";
                     } else {
-                        // Insert rating
-                        $stmt = $pdo->prepare("INSERT INTO Rating (rID, mID, stars, ratingDate) VALUES (?, ?, ?, ?)");
-                        $stmt->execute([$reviewer_id, $movie_id, $stars, $ratingDate]);
+                        // Insert rating (write to master)
+                        executeWriteQuery(
+                            $pdo_master, 
+                            "INSERT INTO Rating (rID, mID, stars, ratingDate) VALUES (?, ?, ?, ?)",
+                            [$reviewer_id, $movie_id, $stars, $ratingDate]
+                        );
                         // Redirect to refresh the page and show updated data
                         header("Location: " . $_SERVER['PHP_SELF'] . "?success=rating_added");
                         exit;
                     }
                 }
             } catch (PDOException $e) {
+                logDbAction("ERROR: " . $e->getMessage());
                 $error_message = "Error adding rating: " . $e->getMessage();
             }
         }
@@ -70,19 +139,29 @@ if (($_POST['action'] ?? '') === 'add_movie') {
             $error_message = "Year must be between 1888 and 2030.";
         } else {
             try {
-                // Check if movie ID already exists
-                $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM Movie WHERE mID = ?");
-                $check_stmt->execute([$movie_id]);
-                if ($check_stmt->fetchColumn() > 0) {
+                // Check if movie ID already exists (read from slave)
+                $movie_count = executeReadQuery(
+                    $pdo_slave, 
+                    "SELECT COUNT(*) FROM Movie WHERE mID = ?", 
+                    [$movie_id], 
+                    'column'
+                );
+                
+                if ($movie_count > 0) {
                     $error_message = "Movie ID already exists. Please use a different ID.";
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO Movie (mID, title, year, director) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$movie_id, $title, $year, $director]);
+                    // Insert movie (write to master)
+                    executeWriteQuery(
+                        $pdo_master, 
+                        "INSERT INTO Movie (mID, title, year, director) VALUES (?, ?, ?, ?)",
+                        [$movie_id, $title, $year, $director]
+                    );
                     // Redirect to refresh the page and show updated data
                     header("Location: " . $_SERVER['PHP_SELF'] . "?success=movie_added");
                     exit;
                 }
             } catch (PDOException $e) {
+                logDbAction("ERROR: " . $e->getMessage());
                 $error_message = "Error adding movie: " . $e->getMessage();
             }
         }
@@ -102,19 +181,29 @@ if (($_POST['action'] ?? '') === 'add_reviewer') {
             $error_message = "Reviewer name cannot be empty.";
         } else {
             try {
-                // Check if reviewer ID already exists
-                $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM Reviewer WHERE rID = ?");
-                $check_stmt->execute([$reviewer_id]);
-                if ($check_stmt->fetchColumn() > 0) {
+                // Check if reviewer ID already exists (read from slave)
+                $reviewer_count = executeReadQuery(
+                    $pdo_slave, 
+                    "SELECT COUNT(*) FROM Reviewer WHERE rID = ?", 
+                    [$reviewer_id], 
+                    'column'
+                );
+                
+                if ($reviewer_count > 0) {
                     $error_message = "Reviewer ID already exists. Please use a different ID.";
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO Reviewer (rID, name) VALUES (?, ?)");
-                    $stmt->execute([$reviewer_id, $name]);
+                    // Insert reviewer (write to master)
+                    executeWriteQuery(
+                        $pdo_master, 
+                        "INSERT INTO Reviewer (rID, name) VALUES (?, ?)",
+                        [$reviewer_id, $name]
+                    );
                     // Redirect to refresh the page and show updated data
                     header("Location: " . $_SERVER['PHP_SELF'] . "?success=reviewer_added");
                     exit;
                 }
             } catch (PDOException $e) {
+                logDbAction("ERROR: " . $e->getMessage());
                 $error_message = "Error adding reviewer: " . $e->getMessage();
             }
         }
@@ -128,15 +217,18 @@ $records_per_page = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $records_per_page;
 
-// Get total number of ratings for pagination
-$count_stmt = $pdo->query("SELECT COUNT(*) FROM Rating r 
+// Get total number of ratings for pagination (read from slave)
+logDbAction("SLAVE READ: Fetching total count of ratings from replica server");
+$count_stmt = $pdo_slave->query("SELECT COUNT(*) FROM Rating r 
                           JOIN Movie m ON r.mID = m.mID 
                           JOIN Reviewer rv ON r.rID = rv.rID");
 $total_records = $count_stmt->fetchColumn();
 $total_pages = ceil($total_records / $records_per_page);
+logDbAction("SLAVE READ: Found {$total_records} total ratings");
 
-// Fetch movie ratings with pagination
-$stmt = $pdo->prepare("
+// Fetch movie ratings with pagination (read from slave)
+logDbAction("SLAVE READ: Fetching ratings page {$page} from replica server");
+$stmt = $pdo_slave->prepare("
     SELECT 
         m.title, 
         m.year, 
@@ -154,10 +246,14 @@ $stmt->bindValue(':limit', $records_per_page, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $ratings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+logDbAction("SLAVE READ: Retrieved " . count($ratings) . " ratings for current page");
 
-// Get movies and reviewers for dropdowns
-$movies = $pdo->query("SELECT mID, title FROM Movie ORDER BY title")->fetchAll(PDO::FETCH_ASSOC);
-$reviewers = $pdo->query("SELECT rID, name FROM Reviewer ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+// Get movies and reviewers for dropdowns (read from slave)
+$movies = executeReadQuery($pdo_slave, "SELECT mID, title FROM Movie ORDER BY title");
+logDbAction("SLAVE READ: Retrieved " . count($movies) . " movies for dropdown");
+
+$reviewers = executeReadQuery($pdo_slave, "SELECT rID, name FROM Reviewer ORDER BY name");
+logDbAction("SLAVE READ: Retrieved " . count($reviewers) . " reviewers for dropdown");
 ?>
 <!DOCTYPE html>
 <html lang="en">
