@@ -19,21 +19,25 @@ echo -e "${YELLOW}Step 1: Loading TLS variables from tls.env...${NC}"
 if [ -f "$PROJECT_ROOT/tls.env" ]; then
     # shellcheck disable=SC1091
     source "$PROJECT_ROOT/tls.env"
-    echo -e "${GREEN}TLS variables loaded from tls.env${NC}"
+    echo -e "${GREEN}\tTLS variables loaded from tls.env${NC}"
 else
-    echo -e "${RED}Error: tls.env file not found at $PROJECT_ROOT/tls.env${NC}"
+    echo -e "${RED}\tError: tls.env file not found at $PROJECT_ROOT/tls.env${NC}"
     exit 1
 fi
 
 # Step 2: Generate compose/.env using task01.env.sh
 echo -e "${YELLOW}Step 2: Generating compose/.env from task01.env.sh...${NC}"
 if [ -f "$PROJECT_ROOT/task01.env.sh" ]; then
-    # mkdir -p "$PROJECT_ROOT/compose"
-    # Execute the generator script and write key=value lines into compose/.env
-    bash "$PROJECT_ROOT/task01.env.sh" > "$PROJECT_ROOT/compose/.env"
-    echo -e "${GREEN}Created $PROJECT_ROOT/compose/.env${NC}"
+    if [ -f "$PROJECT_ROOT/compose/.env" ]; then
+        echo -e "${GREEN}\tComose settings $PROJECT_ROOT/compose/.env already exist. Skipping generation.${NC}"
+    else
+        # mkdir -p "$PROJECT_ROOT/compose"
+        # Execute the generator script and write key=value lines into compose/.env
+        bash "$PROJECT_ROOT/task01.env.sh" > "$PROJECT_ROOT/compose/.env"
+        echo -e "${GREEN}\tCreated $PROJECT_ROOT/compose/.env${NC}"
+    fi
 else
-    echo -e "${RED}Error: task01.env.sh file not found at $PROJECT_ROOT/task01.env.sh${NC}"
+    echo -e "${RED}\tError: task01.env.sh file not found at $PROJECT_ROOT/task01.env.sh${NC}"
     exit 1
 fi
 
@@ -48,7 +52,7 @@ SLAVE_CERT="$PROJECT_ROOT/db/slave/tls/client-cert.pem"
 SLAVE_KEY="$PROJECT_ROOT/db/slave/tls/client-key.pem"
 
 if [ -f "$CA_CERT" ] && [ -f "$CA_KEY" ] && [ -f "$MASTER_CERT" ] && [ -f "$MASTER_KEY" ] && [ -f "$SLAVE_CERT" ] && [ -f "$SLAVE_KEY" ]; then
-    echo -e "${GREEN}TLS certificates already exist. Skipping generation.${NC}"
+    echo -e "${GREEN}\tTLS certificates already exist. Skipping generation.${NC}"
 else
     echo "TLS certificates not found. Generating new certificates..."
     
@@ -76,7 +80,7 @@ else
     chmod 400 client-key.pem
     sudo chown 999:999 client-key.pem
 
-    echo -e "${GREEN}Certificates generated successfully!${NC}"
+    echo -e "${GREEN}\tCertificates generated successfully!${NC}"
 fi
 
 # Start Docker Compose
