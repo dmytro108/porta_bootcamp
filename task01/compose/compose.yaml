@@ -95,17 +95,27 @@ services:
       timeout: 2s
       retries: 20
       start_period: 30s
+
   ### Monitoring with Nagios
-#  nagios:
-#    image: manios/nagios:latest
-#    container_name: nagios
-#    ports:
-#      - "9090:80"
-#    environment:
-#      - NAGIOSADMIN_USER=nagiosadmin
-#      - NAGIOSADMIN_PASS=ChangeMe!
-#      - NAGIOS_TIMEZONE=Europe/London
-#    volumes:
-#      - ../nagios/etc:/opt/nagios/etc
-#      - ../nagios/var:/opt/nagios/var
-#    restart: unless-stopped
+  nagios:
+    image: manios/nagios:latest
+    container_name: nagios
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+      nproc:
+        soft: 4096
+        hard: 4096
+    networks:
+      - porta01
+    ports:
+      - "9090:80"
+    environment:
+      - NAGIOSADMIN_USER=nagiosadmin
+      - NAGIOSADMIN_PASS=ChangeMe!
+      - NAGIOS_TIMEZONE=Europe/London
+    volumes:
+      - ../nagios/etc:/opt/nagios/etc
+      - ../nagios/var:/opt/nagios/var
+    restart: unless-stopped
