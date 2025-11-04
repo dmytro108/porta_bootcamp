@@ -1,6 +1,5 @@
 .vscode/
 **/*.pem
-**/*.env
 **/.env
 **/*.log
 **/*.cache
