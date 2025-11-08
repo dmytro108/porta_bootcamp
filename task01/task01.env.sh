@@ -14,4 +14,12 @@ echo DB_NAME=task01
 echo DB_USER=app_user
 echo DB_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -c5-17)
 
+### WebApp
+echo APP_HOST=apache
 echo APP_PORT=9022
+
+### Monitoring Nagios
+echo NAGIOS_ADMIN=admin
+echo NAGIOS_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -c5-17)
+echo TIMEZONE=Europe/London
+echo NAGIOS_PORT=9090
