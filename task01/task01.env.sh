@@ -17,6 +17,7 @@ echo DB_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -c5-17)
 ### WebApp
 echo APP_HOST=apache
 echo APP_PORT=9022
+echo APP_PORT_SSL=9043
 
 ### Monitoring Nagios
 echo NAGIOS_ADMIN=admin

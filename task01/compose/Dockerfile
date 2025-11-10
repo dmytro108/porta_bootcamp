@@ -8,11 +8,12 @@ RUN apt-get update && apt-get install -y \
 # Install MySQL extensions
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Enable Apache mod_rewrite and ssl
+RUN a2enmod rewrite ssl headers
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Expose port 80
+# Expose ports 80,443
 EXPOSE 80
+EXPOSE 443

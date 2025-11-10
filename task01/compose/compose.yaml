@@ -20,10 +20,15 @@ services:
     container_name: "${APP_HOST}"
     volumes:
       - ../src:/var/www/html
+      - ../apache/conf/001-ssl.conf:/etc/apache2/sites-available/000-default.conf
+      - ../apache/ssl/certs/site.crt:/etc/ssl/certs/site.crt
+      - ../apache/ssl/private/site.key:/etc/ssl/private/site.key
+      - ../apache/ssl/ca/certs/myCA.crt:/etc/ssl/certs/myCA.crt
     networks:
       - porta01
     ports:
       - "${APP_PORT}:80"
+      - "${APP_PORT_SSL}:443"
     depends_on:
       db-slave:
         condition: service_healthy
@@ -33,12 +38,12 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSW}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f -s http://localhost || exit 1"]
-      interval: 5s
-      timeout: 1s
-      retries: 3
-      start_period: 5s
+    #healthcheck:
+    #   test: ["CMD-SHELL", "curl -f -s http://localhost || exit 1"]
+    #  interval: 5s
+    #   timeout: 1s
+    #  retries: 3
+    #  start_period: 5s
 
   ### MySQL database
   db-master:
