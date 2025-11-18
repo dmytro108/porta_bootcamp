@@ -1,0 +1,13 @@
+    [Unit]
+    Description=Restore iptables rules
+    Wants=network-pre.target
+    Before=network-pre.target
+    ConditionPathExists=/home/padavan/repos/porta_bootcamp/task02/iptables.rules
+    
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/sbin/iptables-restore /home/padavan/repos/porta_bootcamp/task02/iptables.rules
+    RemainAfterExit=yes
+    
+    [Install]
+    WantedBy=multi-user.target
