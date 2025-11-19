@@ -10,15 +10,15 @@ relay_log_info_repository=TABLE
 relay_log_recovery=ON
 log_slave_updates=ON
 
-ssl-ca=/etc/mysql/ssl/ca-cert.pem
-ssl-cert=/etc/mysql/ssl/client-cert.pem
-ssl-key=/etc/mysql/ssl/client-key.pem
+ssl-ca=/etc/mysql/ssl/ca.pem
+ssl-cert=/etc/mysql/ssl/client.crt
+ssl-key=/etc/mysql/ssl/client.key
 
 # plugin_load_add=semisync_master=semisync_master.so
 # plugin_load_add=semisync_slave=semisync_slave.so
 # rpl_semi_sync_slave_enabled=1
 
 [client]
-ssl-ca=/etc/mysql/ssl/ca-cert.pem
-ssl-cert=/etc/mysql/ssl/client-cert.pem
-ssl-key=/etc/mysql/ssl/client-key.pem
+ssl-ca=/etc/mysql/ssl/ca.pem
+ssl-cert=/etc/mysql/ssl/client.crt
+ssl-key=/etc/mysql/ssl/client.key

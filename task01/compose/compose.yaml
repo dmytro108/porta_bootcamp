@@ -21,9 +21,9 @@ services:
     volumes:
       - ../src:/var/www/html
       - ../apache/conf/001-ssl.conf:/etc/apache2/sites-available/000-default.conf
-      - ../apache/ssl/certs/site.crt:/etc/ssl/certs/site.crt
-      - ../apache/ssl/private/site.key:/etc/ssl/private/site.key
-      - ../apache/ssl/ca/certs/myCA.crt:/etc/ssl/certs/myCA.crt
+      - ../apache/tls/server.crt:/etc/ssl/certs/server.crt
+      - ../apache/tls/server.key:/etc/ssl/private/server.key
+      - ../tls/ca/certs/ca.crt:/etc/ssl/certs/ca.crt
     networks:
       - porta01
     ports:
@@ -53,9 +53,9 @@ services:
       - ../db/master/config/master.cnf:/etc/mysql/my.cnf
       - ../db/master/init:/docker-entrypoint-initdb.d
       - ../db/master/healthcheck.sh:/usr/bin/healthcheck.sh
-      - ../db/ca-cert.pem:/etc/mysql/ssl/ca-cert.pem
-      - ../db/master/tls/server-cert.pem:/etc/mysql/ssl/server-cert.pem
-      - ../db/master/tls/server-key.pem:/etc/mysql/ssl/server-key.pem
+      - ../tls/ca/certs/ca.crt:/etc/mysql/ssl/ca.pem
+      - ../db/master/tls/server.crt:/etc/mysql/ssl/server.crt
+      - ../db/master/tls/server.key:/etc/mysql/ssl/server.key
       - data_master:/var/lib/mysql
     networks:
       - porta01
@@ -80,9 +80,9 @@ services:
       - ../db/slave/config/replica.cnf:/etc/mysql/my.cnf
       - ../db/slave/init:/docker-entrypoint-initdb.d
       - ../db/slave/healthcheck.sh:/usr/bin/healthcheck.sh
-      - ../db/ca-cert.pem:/etc/mysql/ssl/ca-cert.pem
-      - ../db/slave/tls/client-cert.pem:/etc/mysql/ssl/client-cert.pem
-      - ../db/slave/tls/client-key.pem:/etc/mysql/ssl/client-key.pem
+      - ../tls/ca/certs/ca.crt:/etc/mysql/ssl/ca.pem
+      - ../db/slave/tls/client.crt:/etc/mysql/ssl/client.crt
+      - ../db/slave/tls/client.key:/etc/mysql/ssl/client.key
       - data_replica:/var/lib/mysql
     networks:
       - porta01

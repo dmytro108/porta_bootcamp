@@ -10,9 +10,9 @@ relay_log_recovery=ON
 log_slave_updates=ON
 sync_binlog=1
 
-ssl-ca=/etc/mysql/ssl/ca-cert.pem
-ssl-cert=/etc/mysql/ssl/server-cert.pem
-ssl-key=/etc/mysql/ssl/server-key.pem
+ssl-ca=/etc/mysql/ssl/ca.pem
+ssl-cert=/etc/mysql/ssl/server.crt
+ssl-key=/etc/mysql/ssl/server.key
 
 # plugin_load_add=semisync_master=semisync_master.so
 # plugin_load_add=semisync_slave=semisync_slave.so
