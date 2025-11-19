@@ -1,0 +1,16 @@
+[Unit]
+Description=Restore ipset sets
+DefaultDependencies=no
+After=network-pre.target
+Before=iptables.service netfilter-persistent.service
+Wants=network-pre.target
+ConditionPathExists=/home/padavan/repos/porta_bootcamp/task02/my_subnets.ipset
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ipset restore < /home/padavan/repos/porta_bootcamp/task02/my_subnets.ipset
+ExecStop=/usr/sbin/ipset destroy my_subnets
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,12 @@
 ### Create IP whitelist
-sudo ipset create my_subnets hash:ip
-sudo ipset add my_subnets 192.168.137.0/28
+# sudo ipset create my_subnets hash:ip
+# sudo ipset add my_subnets 192.168.137.0/28
+# sudo ipset list my_subnets
+
+sudo ipset create my_subnets hash:net -exist
+sudo ipset add my_subnets 192.168.137.0/28 -exist
 sudo ipset list my_subnets
+sudo ipset save > my_subnets.ipset
 
 ### Clean table filter, chain INPUT
 sudo iptables -t filter -F
@@ -64,3 +69,5 @@ sudo systemctl restart rsyslog
 ### Redirect port 3333 to ssh (22)
 #sudo iptables -t nat -A PREROUTING --dport 3333 -p tcp \
 #  -j REDIRECT --to-ports 22
+
+sudo systemctl enable ipset-restore iptables-restore
