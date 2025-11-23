@@ -56,6 +56,7 @@ services:
       - ../tls/ca/certs/ca.crt:/etc/mysql/ssl/ca.pem
       - ../db/master/tls/server.crt:/etc/mysql/ssl/server.crt
       - ../db/master/tls/server.key:/etc/mysql/ssl/server.key
+      - ../../task03:/home
       - data_master:/var/lib/mysql
     networks:
       - porta01
