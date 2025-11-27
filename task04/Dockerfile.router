@@ -1,0 +1,30 @@
+# Dockerfile for VPN routers (router1 and router2)
+# Base: Alpine Linux for minimal footprint
+# Purpose: OpenVPN server/client with full routing capabilities
+
+FROM alpine:latest
+
+# Install required packages for VPN routing
+RUN apk add --no-cache \
+    openvpn \
+    iptables \
+    iproute2 \
+    tcpdump \
+    bash \
+    net-tools \
+    bind-tools \
+    curl \
+    vim \
+    procps
+
+# Enable IP forwarding for routing between networks
+RUN echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+
+# Create necessary directories
+RUN mkdir -p /etc/openvpn /var/log
+
+# Set working directory
+WORKDIR /etc/openvpn
+
+# Default command: keep container running
+CMD ["/bin/bash", "-c", "tail -f /dev/null"]

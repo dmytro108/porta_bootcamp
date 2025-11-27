@@ -1,6 +1,11 @@
 .vscode/
 **/*.pem
+**/*.key
+**/*.crt
+**/*.csr
 **/.env
 **/*.log
 **/*.cache
 **/*.dat
+**/ssl/**
+**/pki/*
