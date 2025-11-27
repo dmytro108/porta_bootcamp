@@ -1,0 +1,110 @@
+# MySQL Cleanup Benchmark - Production Cron Schedule
+#
+# This file contains example cron entries for production use.
+# Adjust schedules based on your requirements.
+#
+# Format: minute hour day month weekday user command
+#
+# IMPORTANT: Test all commands manually before scheduling!
+
+# ============================================================================
+# PARTITION MAINTENANCE (Recommended: Daily)
+# ============================================================================
+# Purpose: Add new partitions, drop old partitions beyond retention window
+# When: Daily at 1:00 AM (low traffic period)
+# Risk: Low (DDL operations are fast)
+# Note: Required for partition_drop cleanup method to work
+#
+# 0 1 * * * mysql /home/mysql/db-partition-maintenance.sh
+
+# ============================================================================
+# DATA CLEANUP (Choose ONE method based on your table structure)
+# ============================================================================
+
+# Option 1: DROP PARTITION (RECOMMENDED - fastest, requires partitioned table)
+# Purpose: Remove old data by dropping entire partitions
+# When: Daily at 2:00 AM (after partition maintenance)
+# Risk: Low (very fast, minimal impact)
+# Retention: 10 days (adjust --retention-days as needed)
+#
+# 0 2 * * * mysql /home/mysql/db-cleanup.sh --method partition_drop --retention-days 10
+
+# Option 2: BATCH DELETE (For non-partitioned tables)
+# Purpose: Remove old data in batches (keeps table online)
+# When: Daily at 2:00 AM during low traffic
+# Risk: Medium (slower, causes replication lag, fragmentation)
+# Note: Requires periodic OPTIMIZE TABLE (see below)
+# Batch size: 5000 rows per batch (tune based on workload)
+# Batch delay: 0.1s between batches (increase if replication lag is high)
+#
+# 0 2 * * * mysql /home/mysql/db-cleanup.sh --method batch_delete --batch-size 5000 --batch-delay 0.1
+
+# Option 3: COPY (For scheduled maintenance windows)
+# Purpose: Defragment and cleanup by copying to new table
+# When: Weekly on Sunday at 2:00 AM (maintenance window)
+# Risk: High (data written during copy is LOST, brief table lock during RENAME)
+# Note: Use during planned maintenance only
+#
+# 0 2 * * 0 mysql /home/mysql/db-cleanup.sh --method copy --retention-days 10
+
+# ============================================================================
+# POST-CLEANUP MAINTENANCE
+# ============================================================================
+
+# OPTIMIZE TABLE (Required after batch_delete)
+# Purpose: Reclaim space and reduce fragmentation after batch DELETE
+# When: Weekly on Sunday at 3:00 AM (after cleanup)
+# Risk: Medium (table locked during operation)
+# Note: Only needed if using batch_delete method
+#
+# 0 3 * * 0 mysql bash -c "mysql -e 'OPTIMIZE TABLE cleanup_bench.cleanup_batch;'"
+
+# ============================================================================
+# MONITORING & ALERTS (Optional but recommended)
+# ============================================================================
+
+# Check replication lag
+# Purpose: Alert if replica is falling behind
+# When: Every 5 minutes
+#
+# */5 * * * * mysql /home/mysql/scripts/check-replication-lag.sh
+
+# Check table sizes
+# Purpose: Alert if tables grow beyond expected size
+# When: Daily at 6:00 AM
+#
+# 0 6 * * * mysql /home/mysql/scripts/check-table-sizes.sh
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# 1. CHOOSE ONE CLEANUP METHOD:
+#    - partition_drop: Best performance, requires partitioning
+#    - batch_delete: Table stays online, slower, needs OPTIMIZE
+#    - copy: Good for defrag, use during maintenance windows only
+#
+# 2. SCHEDULE CONSIDERATIONS:
+#    - Run during low-traffic periods (typically 1-4 AM)
+#    - Partition maintenance BEFORE cleanup (partitions must exist)
+#    - OPTIMIZE TABLE after batch delete (weekly is usually sufficient)
+#
+# 3. RETENTION POLICY:
+#    - Default: 10 days (adjust --retention-days as needed)
+#    - Ensure partition retention > cleanup retention
+#
+# 4. MONITORING:
+#    - Check logs in /path/to/results/
+#    - Monitor replication lag during cleanup
+#    - Alert on cleanup failures
+#
+# 5. TESTING:
+#    - Test all cron jobs manually before scheduling
+#    - Verify timing doesn't overlap with other maintenance
+#    - Monitor first few runs closely
+#
+# ============================================================================
+
+# Original example (for reference):
+59 23 */10 * * mysql /home/mysql/db-cleanup.sh
+ 
