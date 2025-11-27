@@ -8,12 +8,20 @@
 # 2. Waits for router1 (OpenVPN server) to be ready
 # 3. Starts OpenVPN client
 # 4. Waits for tunnel interface (tun0)
-# 5. Configures routing to LAN1 via VPN tunnel
-# 6. Sets up iptables rules for packet forwarding
+# 5. Loads routing configuration from /etc/network/routes.conf
+# 6. Loads iptables rules from /etc/network/iptables.rules
 # 7. Keeps container running and tails OpenVPN logs
+#
+# Configuration files (Infrastructure as Code):
+#   - /etc/network/routes.conf     - Static routes
+#   - /etc/network/iptables.rules  - Firewall rules
 #############################################################################
 
 set -e  # Exit on error
+
+# Configuration paths
+IPTABLES_RULES="/etc/network/iptables.rules"
+ROUTES_CONF="/etc/network/routes.conf"
 
 echo "========================================"
 echo "Router2 Initialization Starting..."
@@ -87,39 +95,66 @@ if [ $ELAPSED -ge $TIMEOUT ]; then
     exit 1
 fi
 
-# Step 6: Configure routing to LAN1 via tunnel
-echo "[6/7] Configuring routing..."
+# Step 6: Load routing configuration
+echo "[6/7] Loading routing configuration..."
 
-# The route to LAN1 (10.10.0.0/24) should be added automatically by OpenVPN
-# based on the 'route' directive in client.conf
-# We verify it exists
-
-if ip route | grep -q "10.10.0.0/24.*tun0"; then
-    echo "      ✓ Route to LAN1 (10.10.0.0/24) via tun0 configured"
+# Check if routes.conf exists
+if [ ! -f "$ROUTES_CONF" ]; then
+    echo "      ⚠ WARNING: $ROUTES_CONF not found, skipping custom routes"
 else
-    echo "      ⚠ Route to LAN1 not found, adding manually..."
-    sleep 2
-    if ip route | grep -q "10.10.0.0/24"; then
-        echo "      ✓ Route to LAN1 now present"
-    else
-        echo "      ⚠ Route not automatically configured, check OpenVPN logs"
+    # Parse and apply routes from configuration file
+    ROUTES_APPLIED=0
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+        
+        # Apply the route
+        if ip route add $line 2>/dev/null; then
+            echo "      ✓ Added route: $line"
+            ROUTES_APPLIED=$((ROUTES_APPLIED + 1))
+        else
+            # Route might already exist (added by OpenVPN automatically)
+            if ip route | grep -q "$(echo $line | awk '{print $1}')"; then
+                echo "      ℹ Route already exists: $line"
+            else
+                echo "      ⚠ Failed to add route: $line"
+            fi
+        fi
+    done < "$ROUTES_CONF"
+    
+    if [ $ROUTES_APPLIED -eq 0 ]; then
+        echo "      ℹ No custom routes applied (may be handled by OpenVPN)"
     fi
 fi
 
-# Step 7: Configure iptables for forwarding
-echo "[7/7] Configuring iptables..."
+# Verify critical routes
+if ip route | grep -q "10.10.0.0/24"; then
+    echo "      ✓ Route to LAN1 (10.10.0.0/24) verified"
+else
+    echo "      ⚠ Route to LAN1 not found"
+fi
 
-# Allow forwarding on tunnel interface
-iptables -C FORWARD -i tun0 -j ACCEPT 2>/dev/null || iptables -A FORWARD -i tun0 -j ACCEPT
-iptables -C FORWARD -o tun0 -j ACCEPT 2>/dev/null || iptables -A FORWARD -o tun0 -j ACCEPT
+# Step 7: Load iptables configuration
+echo "[7/7] Loading iptables configuration..."
 
-# Allow forwarding between LANs
-iptables -C FORWARD -s 10.20.0.0/24 -d 10.10.0.0/24 -j ACCEPT 2>/dev/null || \
-    iptables -A FORWARD -s 10.20.0.0/24 -d 10.10.0.0/24 -j ACCEPT
-iptables -C FORWARD -s 10.10.0.0/24 -d 10.20.0.0/24 -j ACCEPT 2>/dev/null || \
-    iptables -A FORWARD -s 10.10.0.0/24 -d 10.20.0.0/24 -j ACCEPT
+# Check if iptables.rules exists
+if [ ! -f "$IPTABLES_RULES" ]; then
+    echo "      ✗ ERROR: $IPTABLES_RULES not found!"
+    echo "      Cannot configure firewall rules"
+    exit 1
+fi
 
-echo "      ✓ iptables forwarding rules configured"
+# Apply iptables rules from configuration file
+if iptables-restore -n < "$IPTABLES_RULES"; then
+    echo "      ✓ iptables rules loaded from $IPTABLES_RULES"
+    
+    # Display applied rules
+    RULE_COUNT=$(iptables -L FORWARD -n | grep -c "ACCEPT" || echo "0")
+    echo "      ✓ $RULE_COUNT forwarding rules active"
+else
+    echo "      ✗ ERROR: Failed to load iptables rules"
+    exit 1
+fi
 
 # Display current routing table
 echo ""

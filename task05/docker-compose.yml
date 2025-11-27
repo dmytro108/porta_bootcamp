@@ -71,13 +71,10 @@ services:
     networks:
       lan1:
         ipv4_address: 10.10.0.10
-    # Set router1 as default gateway
-    command: >
-      /bin/bash -c "
-      ip route del default 2>/dev/null || true;
-      ip route add default via 10.10.0.2;
-      tail -f /dev/null
-      "
+    volumes:
+      - ./configs/host1/network:/etc/network
+      - ./scripts:/scripts
+    command: ["/bin/bash", "/scripts/host-entrypoint.sh"]
     depends_on:
       - router1
     restart: unless-stopped
@@ -95,13 +92,10 @@ services:
     networks:
       lan2:
         ipv4_address: 10.20.0.10
-    # Set router2 as default gateway
-    command: >
-      /bin/bash -c "
-      ip route del default 2>/dev/null || true;
-      ip route add default via 10.20.0.2;
-      tail -f /dev/null
-      "
+    volumes:
+      - ./configs/host2/network:/etc/network
+      - ./scripts:/scripts
+    command: ["/bin/bash", "/scripts/host-entrypoint.sh"]
     depends_on:
       - router2
     restart: unless-stopped
