@@ -204,17 +204,17 @@ generate_dh() {
     cd "$PKI_DIR/easyrsa"
     
     print_info "Generating DH parameters..."
-    print_warning "Using 1024-bit DH for faster generation (suitable for lab/testing)"
+    print_warning "Using 2048-bit DH for faster generation"
     print_info "For production, use 2048-bit or higher"
     
-    # Use 1024-bit for faster generation in lab environment
+    # Use 2048-bit for faster generation in lab environment
     # For production, change to 2048 or 4096
-    openssl dhparam -out pki/dh.pem 1024 2>&1 | grep -v "^[.+]"
+    openssl dhparam -out pki/dh.pem 2048 2>&1 | grep -v "^[.+]"
     
     # Verify DH creation
     if [ -f "pki/dh.pem" ]; then
         print_success "DH parameters generated successfully"
-        print_info "  DH Parameters: pki/dh.pem (1024-bit)"
+        print_info "  DH Parameters: pki/dh.pem (2048-bit)"
     else
         print_error "Failed to generate DH parameters"
         exit 1
@@ -229,21 +229,26 @@ generate_tls_auth() {
     
     print_info "Generating TLS-auth key..."
     
-    # Try openvpn first, fallback to openssl if not available
+    # OpenVPN requires properly formatted TLS-auth/TLS-crypt key
+    # Must use openvpn --genkey to create proper format with headers
     if command -v openvpn &> /dev/null; then
         openvpn --genkey secret pki/ta.key
+        print_success "TLS-auth key generated with OpenVPN"
     else
-        print_warning "OpenVPN not found, using openssl to generate TLS-auth key"
-        # Generate a 2048-bit (256 byte) random key compatible with OpenVPN
-        openssl rand -hex 256 > pki/ta.key
+        print_error "OpenVPN is not installed. Cannot generate proper TLS-auth key."
+        print_error "Please install OpenVPN and try again."
+        print_info "On Debian/Ubuntu: sudo apt-get install openvpn"
+        print_info "On RHEL/CentOS: sudo yum install openvpn"
+        print_info "On Alpine: apk add openvpn"
+        exit 1
     fi
     
-    # Verify TLS-auth key creation
-    if [ -f "pki/ta.key" ]; then
-        print_success "TLS-auth key generated successfully"
+    # Verify TLS-auth key creation and format
+    if [ -f "pki/ta.key" ] && grep -q "BEGIN OpenVPN Static key" pki/ta.key; then
+        print_success "TLS-auth key generated successfully with proper format"
         print_info "  TLS-Auth Key: pki/ta.key"
     else
-        print_error "Failed to generate TLS-auth key"
+        print_error "Failed to generate TLS-auth key with proper format"
         exit 1
     fi
 }
