@@ -15,9 +15,9 @@ services:
       - /dev/net/tun:/dev/net/tun
     networks:
       lan1:
-        ipv4_address: 10.10.0.2
+        ipv4_address: ${ROUTER1_LAN1_IP}
       public:
-        ipv4_address: 192.168.100.11
+        ipv4_address: ${ROUTER1_PUBLIC_IP}
     volumes:
       - ./configs/router1/openvpn:/etc/openvpn:ro
       - ./configs/router1/openvpn/ccd:/etc/openvpn/ccd:ro
@@ -44,9 +44,9 @@ services:
       - /dev/net/tun:/dev/net/tun
     networks:
       lan2:
-        ipv4_address: 10.20.0.2
+        ipv4_address: ${ROUTER2_LAN2_IP}
       public:
-        ipv4_address: 192.168.100.12
+        ipv4_address: ${ROUTER2_PUBLIC_IP}
     volumes:
       - ./configs/router2/openvpn:/etc/openvpn:ro
       - ./configs/router2/network:/etc/network
@@ -70,7 +70,7 @@ services:
       - NET_ADMIN
     networks:
       lan1:
-        ipv4_address: 10.10.0.10
+        ipv4_address: ${HOST1_IP}
     volumes:
       - ./configs/host1/network:/etc/network
       - ./scripts:/scripts
@@ -91,7 +91,7 @@ services:
       - NET_ADMIN
     networks:
       lan2:
-        ipv4_address: 10.20.0.10
+        ipv4_address: ${HOST2_IP}
     volumes:
       - ./configs/host2/network:/etc/network
       - ./scripts:/scripts
@@ -107,7 +107,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 10.10.0.0/24
+        - subnet: ${LAN1_SUBNET}
     driver_opts:
       com.docker.network.bridge.name: br-lan1
 
@@ -117,7 +117,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 10.20.0.0/24
+        - subnet: ${LAN2_SUBNET}
     driver_opts:
       com.docker.network.bridge.name: br-lan2
 
@@ -127,6 +127,6 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 192.168.100.0/24
+        - subnet: ${PUBLIC_SUBNET}
     driver_opts:
       com.docker.network.bridge.name: br-public
