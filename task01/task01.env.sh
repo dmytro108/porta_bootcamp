@@ -5,6 +5,8 @@ echo DB_MASTER_ROOT_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -
 echo DB_SLAVE_HOST=db_slave
 echo DB_SLAVE_ROOT_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -c5-17)
 
+echo DB_ADM_HOST=db_adm
+
 ### DB replication user credential
 echo DB_REPLICA_USER=replic
 echo DB_REPLICA_PASSW=$(openssl rand -base64 32 | tr -cd "a-zA-Z0-9" | cut -c5-17)

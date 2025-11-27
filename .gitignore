@@ -1,11 +1,19 @@
 .vscode/
+
+## Environment
+**/.env
+
+## Logs and data
+**/*.log
+**/*.cache
+**/*.dat
+**/*.csv
+
+## Secrets
+**/ssl/**
+**/pki/*
+**/tls/*
 **/*.pem
 **/*.key
 **/*.crt
 **/*.csr
-**/.env
-**/*.log
-**/*.cache
-**/*.dat
-**/ssl/**
-**/pki/*
