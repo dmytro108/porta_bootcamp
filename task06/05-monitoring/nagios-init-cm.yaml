@@ -1,0 +1,30 @@
+apiVersion: v1
+data:
+  init.sh: |-
+    #!/bin/sh
+
+    set -eu
+
+    NAGIOS_VARS_FILE="/home/nagios/vars"
+    NAGIOS_RESOURCES="/opt/nagios/etc/resource.cfg"
+
+    # Append dynamic variables to resource.cfg
+    if [ ! -f ${NAGIOS_VARS_FILE} ]; then
+      echo "" > /home/nagios/vars
+      echo "\$USER10\$=${DB_MASTER_HOST}" >> ${NAGIOS_VARS_FILE}
+      echo "\$USER20\$=${DB_SLAVE_HOST}" >> ${NAGIOS_VARS_FILE}
+      echo "\$USER30\$=${APP_HOST}" >> ${NAGIOS_VARS_FILE}
+      echo "\$USER11\$=${DB_USER}" >> ${NAGIOS_VARS_FILE}
+      echo "\$USER12\$=${DB_PASSWORD}" >> ${NAGIOS_VARS_FILE}
+      cat ${NAGIOS_VARS_FILE} >> ${NAGIOS_RESOURCES}
+    fi
+
+    /usr/local/bin/start_nagios
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    io.kompose.service: nagios
+  name: nagios-cm1
+  namespace: bootcamp

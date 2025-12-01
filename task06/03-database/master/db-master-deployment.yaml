@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.37.0 (fb0539e64)
+  labels:
+    io.kompose.service: db-master
+  name: db-master
+  namespace: bootcamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: db-master
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.37.0 (fb0539e64)
+      labels:
+        io.kompose.service: db-master
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_PASSWORD
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_USER
+        - name: REPLICA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: REPLICA_PASSWORD
+        - name: REPLICA_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: REPLICA_USER
+        envFrom:
+        - configMapRef:
+            name: env
+        image: mysql:8.0
+        livenessProbe:
+          exec:
+            command:
+            - /usr/bin/healthcheck.sh
+          failureThreshold: 10
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 1
+        name: db-master
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/mysql/my.cnf
+          name: db-master-cm0
+          subPath: my.cnf
+        - mountPath: /docker-entrypoint-initdb.d
+          name: db-master-cm1
+        - mountPath: /usr/bin/healthcheck.sh
+          name: db-master-cm2
+          subPath: healthcheck.sh
+        - mountPath: /etc/mysql/ssl/ca.pem
+          name: db-ca-crt
+          subPath: ca.pem
+        - mountPath: /etc/mysql/ssl/server.crt
+          name: db-master-crt
+          subPath: server.crt
+        - mountPath: /etc/mysql/ssl/server.key
+          name: db-master-key
+          subPath: server.key
+        - mountPath: /var/lib/mysql
+          name: data-master
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          items:
+          - key: master.cnf
+            path: my.cnf
+          name: db-master-cm0
+        name: db-master-cm0
+      - configMap:
+          name: db-master-cm1
+        name: db-master-cm1
+      - configMap:
+          defaultMode: 493
+          items:
+          - key: healthcheck.sh
+            path: healthcheck.sh
+          name: db-master-cm2
+        name: db-master-cm2
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.pem
+          name: ca.crt
+        name: db-ca-crt
+      - configMap:
+          items:
+          - key: server.crt
+            path: server.crt
+          name: db-master.crt
+        name: db-master-crt
+      - secret:
+          items:
+          - key: server.key
+            path: server.key
+          secretName: db-master.key
+        name: db-master-key
+      - name: data-master
+        persistentVolumeClaim:
+          claimName: data-master

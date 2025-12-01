@@ -1,0 +1,2749 @@
+apiVersion: v1
+data:
+  cgi.cfg: |
+    #################################################################
+    #
+    # CGI.CFG - Sample CGI Configuration File for Nagios 4.5.9
+    #
+    #
+    #################################################################
+
+
+    # MAIN CONFIGURATION FILE
+    # This tells the CGIs where to find your main configuration file.
+    # The CGIs will read the main and host config files for any other
+    # data they might need.
+
+    main_config_file=/opt/nagios/etc/nagios.cfg
+
+
+
+    # PHYSICAL HTML PATH
+    # This is the path where the HTML files for Nagios reside.  This
+    # value is used to locate the logo images needed by the statusmap
+    # and statuswrl CGIs.
+
+    physical_html_path=/opt/nagios/share
+
+
+
+    # URL HTML PATH
+    # This is the path portion of the URL that corresponds to the
+    # physical location of the Nagios HTML files (as defined above).
+    # This value is used by the CGIs to locate the online documentation
+    # and graphics.  If you access the Nagios pages with an URL like
+    # http://www.myhost.com/nagios, this value should be '/nagios'
+    # (without the quotes).
+
+    url_html_path=/nagios
+
+
+
+    # CONTEXT-SENSITIVE HELP
+    # This option determines whether or not a context-sensitive
+    # help icon will be displayed for most of the CGIs.
+    # Values: 0 = disables context-sensitive help
+    #         1 = enables context-sensitive help
+
+    show_context_help=0
+
+
+
+    # PENDING STATES OPTION
+    # This option determines what states should be displayed in the web
+    # interface for hosts/services that have not yet been checked.
+    # Values: 0 = leave hosts/services that have not been check yet in their original state
+    #         1 = mark hosts/services that have not been checked yet as PENDING
+
+    use_pending_states=1
+
+
+
+    # AUTHENTICATION USAGE
+    # This option controls whether or not the CGIs will use any
+    # authentication when displaying host and service information, as
+    # well as committing commands to Nagios for processing.
+    #
+    # Read the HTML documentation to learn how the authorization works!
+    #
+    # NOTE: It is a really *bad* idea to disable authorization, unless
+    # you plan on removing the command CGI (cmd.cgi)!  Failure to do
+    # so will leave you wide open to kiddies messing with Nagios and
+    # possibly hitting you with a denial of service attack by filling up
+    # your drive by continuously writing to your command file!
+    #
+    # Setting this value to 0 will cause the CGIs to *not* use
+    # authentication (bad idea), while any other value will make them
+    # use the authentication functions (the default).
+
+    use_authentication=1
+
+
+
+    # x509 CERT AUTHENTICATION
+    # When enabled, this option allows you to use x509 cert (SSL)
+    # authentication in the CGIs.  This is an advanced option and should
+    # not be enabled unless you know what you're doing.
+
+    use_ssl_authentication=0
+
+
+
+    # DEFAULT USER
+    # Setting this variable will define a default user name that can
+    # access pages without authentication.  This allows people within a
+    # secure domain (i.e., behind a firewall) to see the current status
+    # without authenticating.  You may want to use this to avoid basic
+    # authentication if you are not using a secure server since basic
+    # authentication transmits passwords in the clear.
+    #
+    # Important:  Do not define a default username unless you are
+    # running a secure web server and are sure that everyone who has
+    # access to the CGIs has been authenticated in some manner!  If you
+    # define this variable, anyone who has not authenticated to the web
+    # server will inherit all rights you assign to this user!
+
+    #default_user_name=guest
+
+
+
+    # SYSTEM/PROCESS INFORMATION ACCESS
+    # This option is a comma-delimited list of all usernames that
+    # have access to viewing the Nagios process information as
+    # provided by the Extended Information CGI (extinfo.cgi).  By
+    # default, *no one* has access to this unless you choose to
+    # not use authorization.  You may use an asterisk (*) to
+    # authorize any user who has authenticated to the web server.
+
+    authorized_for_system_information=admin
+
+
+
+    # CONFIGURATION INFORMATION ACCESS
+    # This option is a comma-delimited list of all usernames that
+    # can view ALL configuration information (hosts, commands, etc).
+    # By default, users can only view configuration information
+    # for the hosts and services they are contacts for. You may use
+    # an asterisk (*) to authorize any user who has authenticated
+    # to the web server.
+
+    authorized_for_configuration_information=admin
+
+
+
+    # SYSTEM/PROCESS COMMAND ACCESS
+    # This option is a comma-delimited list of all usernames that
+    # can issue shutdown and restart commands to Nagios via the
+    # command CGI (cmd.cgi).  Users in this list can also change
+    # the program mode to active or standby. By default, *no one*
+    # has access to this unless you choose to not use authorization.
+    # You may use an asterisk (*) to authorize any user who has
+    # authenticated to the web server.
+
+    authorized_for_system_commands=admin
+
+
+
+    # GLOBAL HOST/SERVICE VIEW ACCESS
+    # These two options are comma-delimited lists of all usernames that
+    # can view information for all hosts and services that are being
+    # monitored.  By default, users can only view information
+    # for hosts or services that they are contacts for (unless you
+    # you choose to not use authorization). You may use an asterisk (*)
+    # to authorize any user who has authenticated to the web server.
+
+    authorized_for_all_services=admin
+    authorized_for_all_hosts=admin
+
+
+
+    # GLOBAL HOST/SERVICE COMMAND ACCESS
+    # These two options are comma-delimited lists of all usernames that
+    # can issue host or service related commands via the command
+    # CGI (cmd.cgi) for all hosts and services that are being monitored.
+    # By default, users can only issue commands for hosts or services
+    # that they are contacts for (unless you choose to not use
+    # authorization).  You may use an asterisk (*) to authorize any
+    # user who has authenticated to the web server.
+
+    authorized_for_all_service_commands=admin
+    authorized_for_all_host_commands=admin
+
+
+
+    # READ-ONLY USERS
+    # A comma-delimited list of usernames that have read-only rights in
+    # the CGIs.  This will block any service or host commands normally shown
+    # on the extinfo CGI pages.  It will also block comments from being shown
+    # to read-only users.
+
+    #authorized_for_read_only=user1,user2
+
+
+
+    # STATUSMAP BACKGROUND IMAGE
+    # This option allows you to specify an image to be used as a
+    # background in the statusmap CGI.  It is assumed that the image
+    # resides in the HTML images path (i.e. /usr/local/nagios/share/images).
+    # This path is automatically determined by appending "/images"
+    # to the path specified by the 'physical_html_path' directive.
+    # Note:  The image file may be in GIF, PNG, JPEG, or GD2 format.
+    # However, I recommend that you convert your image to GD2 format
+    # (uncompressed) but ONLY IF YOU WILL USE THE LEGACY MAP EXCLUSIVELY,
+    # as this will cause less CPU load when the CGI generates the image.
+
+    #statusmap_background_image=smbackground.gd2
+
+
+
+    # STATUSMAP TRANSPARENCY INDEX COLOR
+    # These options set the r,g,b values of the background color used the statusmap CGI,
+    # so normal browsers that can't show real png transparency set the desired color as
+    # a background color instead (to make it look pretty).
+    # Defaults to white: (R,G,B) = (255,255,255).
+
+    #color_transparency_index_r=255
+    #color_transparency_index_g=255
+    #color_transparency_index_b=255
+
+
+
+    # DEFAULT STATUSMAP LAYOUT METHOD
+    # This option allows you to specify the default layout method
+    # the statusmap CGI should use for drawing hosts.  If you do
+    # not use this option, the default for the legacy map is to use
+    # user-defined coordinates and the default for the new map is "6"
+    # (Circular Balloon).
+    # Valid options for the legacy map are as follows:
+    #	0 = User-defined coordinates
+    #	1 = Depth layers
+    #	2 = Collapsed tree
+    #	3 = Balanced tree
+    #	4 = Circular
+    #	5 = Circular (Marked Up)
+    # Valid options for the new map are as follows:
+    #	0 = User-defined coordinates
+    #	1 = Depth Layers (Horizontal)
+    #	2 = Collapsed tree (Horizontal)
+    #	3 = Balanced tree (Horizontal)
+    #	4 = DON'T USE
+    #	5 = Circular Markup
+    #	6 = Circular Balloon
+    #	7 = Balanced tree (Vertical)
+    #	8 = Collapsed tree (Vertical)
+    #	9 = Depth Layers (Vertical)
+    #	10 = Force Map
+
+    #default_statusmap_layout=6
+
+
+
+    # DEFAULT STATUSWRL LAYOUT METHOD
+    # This option allows you to specify the default layout method
+    # the statuswrl (VRML) CGI should use for drawing hosts.  If you
+    # do not use this option, the default is to use user-defined
+    # coordinates.  Valid options are as follows:
+    #	0 = User-defined coordinates
+    #       2 = Collapsed tree
+    #       3 = Balanced tree
+    #       4 = Circular
+
+    default_statuswrl_layout=4
+
+
+
+    # STATUSWRL INCLUDE
+    # This option allows you to include your own objects in the
+    # generated VRML world.  It is assumed that the file
+    # resides in the HTML path (i.e. /usr/local/nagios/share).
+
+    #statuswrl_include=myworld.wrl
+
+
+
+    # PING SYNTAX
+    # This option determines what syntax should be used when
+    # attempting to ping a host from the WAP interface (using
+    # the statuswml CGI.  You must include the full path to
+    # the ping binary, along with all required options.  The
+    # $HOSTADDRESS$ macro is substituted with the address of
+    # the host before the command is executed.
+    # Please note that the syntax for the ping binary is
+    # notorious for being different on virtually ever *NIX
+    # OS and distribution, so you may have to tweak this to
+    # work on your system.
+
+    ping_syntax=/bin/ping -n -U -c 5 $HOSTADDRESS$
+
+
+
+    # REFRESH RATE
+    # This option allows you to specify the refresh rate in seconds
+    # of various CGIs (status, statusmap, extinfo, and outages).
+
+    refresh_rate=90
+
+
+
+    # PAGE TOUR
+    # Enable page tour for helpful tips and tricks on various pages
+
+    #enable_page_tour=1
+
+
+
+    # DEFAULT PAGE LIMIT
+    # This option allows you to specify the default number of results
+    # displayed on the status.cgi.  This number can be adjusted from
+    # within the UI after the initial page load. Setting this to 0
+    # will show all results.
+
+    result_limit=100
+
+
+
+    # ESCAPE HTML TAGS
+    # This option determines whether HTML tags in host and service
+    # status output is escaped in the web interface.  If enabled,
+    # your plugin output will not be able to contain clickable links.
+
+    escape_html_tags=1
+
+
+
+    # SOUND OPTIONS
+    # These options allow you to specify an optional audio file
+    # that should be played in your browser window when there are
+    # problems on the network.  The audio files are used only in
+    # the status CGI.  Only the sound for the most critical problem
+    # will be played.  Order of importance (higher to lower) is as
+    # follows: unreachable hosts, down hosts, critical services,
+    # warning services, and unknown services. If there are no
+    # visible problems, the sound file optionally specified by
+    # 'normal_sound' variable will be played.
+    #
+    #
+    # <varname>=<sound_file>
+    #
+    # Note: All audio files must be placed in the /media subdirectory
+    # under the HTML path (i.e. /usr/local/nagios/share/media/).
+
+    #host_unreachable_sound=hostdown.wav
+    #host_down_sound=hostdown.wav
+    #service_critical_sound=critical.wav
+    #service_warning_sound=warning.wav
+    #service_unknown_sound=warning.wav
+    #normal_sound=noproblem.wav
+
+
+
+    # URL TARGET FRAMES
+    # These options determine the target frames in which notes and
+    # action URLs will open.
+
+    action_url_target=_blank
+    notes_url_target=_blank
+
+
+
+    # LOCK AUTHOR NAMES OPTION
+    # This option determines whether users can change the author name
+    # when submitting comments, scheduling downtime.  If disabled, the
+    # author names will be locked into their contact name, as defined in Nagios.
+    # Values: 0 = allow editing author names
+    #         1 = lock author names (disallow editing)
+
+    lock_author_names=1
+
+
+
+    # SPLUNK INTEGRATION OPTIONS
+    # These options allow you to enable integration with Splunk
+    # in the web interface.  If enabled, you'll be presented with
+    # "Splunk It" links in various places in the CGIs (log file,
+    # alert history, host/service detail, etc).  Useful if you're
+    # trying to research why a particular problem occurred.
+    # For more information on Splunk, visit http://www.splunk.com/
+
+    # This option determines whether the Splunk integration is enabled
+    # Values: 0 = disable Splunk integration
+    #         1 = enable Splunk integration
+
+    #enable_splunk_integration=1
+
+    # This option should be the URL used to access your instance of Splunk
+    #splunk_url=http://127.0.0.1:8000/
+
+
+
+    # NAVIGATION BAR SEARCH OPTIONS
+    # The following options allow to configure the navbar search. Default
+    # is to search for hostnames. With enabled navbar_search_for_addresses,
+    # the navbar search queries IP addresses as well. It's also possible
+    # to enable search for aliases by setting navbar_search_for_aliases=1.
+
+    navbar_search_for_addresses=1
+    navbar_search_for_aliases=1
+
+
+
+    # DEFAULTS FOR CHECKBOXES FOR ACKNOWLEDGEMENTS
+    # Enabling ack_no_sticky will default the "Sticky Acknowledgement" to
+    # be unchecked.
+    # Enabling ack_no_send will default the "Send Notification" to
+    # be unchecked.
+
+    #ack_no_sticky=0
+    #ack_no_send=0
+
+
+
+    # SHOW ONLY HARD STATES IS TACTICAL OVERVIEW
+    # This option controls whether only HARD states are counted on the
+    # Tactical Overview, or if both HARD and SOFT states are counted.
+    # Set to 1 to show only HARD states. Defaults to 0 (HARD+SOFT).
+
+    #tac_cgi_hard_only=0
+
+
+
+    # COMMAND COMMENTS
+    # These options control whether or not comments are required, optional,
+    # or not allowed for specific commands. The format for each line is:
+    #    cmd-name=req,def-comment
+    #
+    #    cmd-name     is "CMT_" plus a command such as ADD_HOST_COMMENT
+    #    req          0 = not allowed, 1 = optional, 2 = required
+    #    def-comment  optional default comment that will be put in the input field
+    #
+    # The following examples override the default comment requirements in
+    # some way.
+
+    #CMT_ADD_HOST_COMMENT=1
+    #CMT_ACKNOWLEDGE_HOST_PROBLEM=2,"Problem is being looked into"
+    #CMT_SCHEDULE_SVC_CHECK=1
+    #CMT_SCHEDULE_HOST_DOWNTIME=0
+  htpasswd.users: |
+    nagiosadmin:{SHA}iHn6Tr1rRyX12ZRA1ZV5NfYUJiw=
+  nagios.cfg: "##############################################################################
+
+    #
+
+    # NAGIOS.CFG - Sample Main Config File for Nagios 4.5.9
+
+    #
+
+    # Read the documentation for more information on this configuration
+
+    # file.  I've provided some comments here, but things may not be so
+
+    # clear without further explanation.
+
+    #
+
+    #
+
+    ##############################################################################
+
+
+
+    # LOG FILE
+
+    # This is the main log file where service and host events are logged
+
+    # for historical purposes.  This should be the first option specified
+
+    # in the config file!!!
+
+
+    log_file=/opt/nagios/var/nagios.log
+
+
+
+
+    # OBJECT CONFIGURATION FILE(S)
+
+    # These are the object configuration files in which you define hosts,
+
+    # host groups, contacts, contact groups, services, etc.
+
+    # You can split your object definitions across several config files
+
+    # if you wish (as shown below), or keep them all in a single config file.
+
+
+    # You can specify individual object config files as shown below:
+
+    cfg_file=/opt/nagios/etc/objects/commands.cfg
+
+    cfg_file=/opt/nagios/etc/objects/contacts.cfg
+
+    cfg_file=/opt/nagios/etc/objects/timeperiods.cfg
+
+    cfg_file=/opt/nagios/etc/objects/templates.cfg
+
+
+    # Definitions for monitoring the local (Linux) host
+
+    cfg_file=/opt/nagios/etc/objects/nagios.cfg
+
+    cfg_file=/opt/nagios/etc/objects/apache.cfg
+
+    cfg_file=/opt/nagios/etc/objects/mysql_master.cfg
+
+    cfg_file=/opt/nagios/etc/objects/mysql_slave.cfg
+
+    cfg_file=/opt/nagios/etc/objects/host.cfg
+
+
+    cfg_file=/opt/nagios/etc/objects/hostgroups.cfg
+
+
+    # Definitions for monitoring a Windows machine
+
+    #cfg_file=/opt/nagios/etc/objects/windows.cfg
+
+
+    # Definitions for monitoring a router/switch
+
+    #cfg_file=/opt/nagios/etc/objects/switch.cfg
+
+
+    # Definitions for monitoring a network printer
+
+    #cfg_file=/opt/nagios/etc/objects/printer.cfg
+
+
+
+    # You can also tell Nagios to process all config files (with a .cfg
+
+    # extension) in a particular directory by using the cfg_dir
+
+    # directive as shown below:
+
+
+    #cfg_dir=/opt/nagios/etc/servers
+
+    #cfg_dir=/opt/nagios/etc/printers
+
+    #cfg_dir=/opt/nagios/etc/switches
+
+    #cfg_dir=/opt/nagios/etc/routers
+
+
+
+
+
+    # OBJECT CACHE FILE
+
+    # This option determines where object definitions are cached when
+
+    # Nagios starts/restarts.  The CGIs read object definitions from
+
+    # this cache file (rather than looking at the object config files
+
+    # directly) in order to prevent inconsistencies that can occur
+
+    # when the config files are modified after Nagios starts.
+
+
+    object_cache_file=/opt/nagios/var/objects.cache
+
+
+
+
+    # PRE-CACHED OBJECT FILE
+
+    # This options determines the location of the precached object file.
+
+    # If you run Nagios with the -p command line option, it will preprocess
+
+    # your object configuration file(s) and write the cached config to this
+
+    # file.  You can then start Nagios with the -u option to have it read
+
+    # object definitions from this precached file, rather than the standard
+
+    # object configuration files (see the cfg_file and cfg_dir options above).
+
+    # Using a precached object file can speed up the time needed to (re)start
+
+    # the Nagios process if you've got a large and/or complex configuration.
+
+    # Read the documentation section on optimizing Nagios to find our more
+
+    # about how this feature works.
+
+
+    precached_object_file=/opt/nagios/var/objects.precache
+
+
+
+
+    # RESOURCE FILE
+
+    # This is an optional resource file that contains $USERx$ macro
+
+    # definitions. Multiple resource files can be specified by using
+
+    # multiple resource_file definitions.  The CGIs will not attempt to
+
+    # read the contents of resource files, so information that is
+
+    # considered to be sensitive (usernames, passwords, etc) can be
+
+    # defined as macros in this file and restrictive permissions (600)
+
+    # can be placed on this file.
+
+
+    resource_file=/opt/nagios/etc/resource.cfg
+
+
+
+
+    # STATUS FILE
+
+    # This is where the current status of all monitored services and
+
+    # hosts is stored.  Its contents are read and processed by the CGIs.
+
+    # The contents of the status file are deleted every time Nagios
+
+    #  restarts.
+
+
+    status_file=/opt/nagios/var/status.dat
+
+
+
+
+    # STATUS FILE UPDATE INTERVAL
+
+    # This option determines the frequency (in seconds) that
+
+    # Nagios will periodically dump program, host, and
+
+    # service status data.
+
+
+    status_update_interval=10
+
+
+
+
+    # NAGIOS USER
+
+    # This determines the effective user that Nagios should run as.
+
+    # You can either supply a username or a UID.
+
+
+    nagios_user=nagios
+
+
+
+
+    # NAGIOS GROUP
+
+    # This determines the effective group that Nagios should run as.
+
+    # You can either supply a group name or a GID.
+
+
+    nagios_group=nagios
+
+
+
+
+    # EXTERNAL COMMAND OPTION
+
+    # This option allows you to specify whether or not Nagios should check
+
+    # for external commands (in the command file defined below).\ 
+
+    # By default Nagios will check for external commands.
+
+    # If you want to be able to use the CGI command interface
+
+    # you will have to enable this.
+
+    # Values: 0 = disable commands, 1 = enable commands
+
+
+    check_external_commands=1
+
+
+
+
+    # EXTERNAL COMMAND FILE
+
+    # This is the file that Nagios checks for external command requests.
+
+    # It is also where the command CGI will write commands that are submitted
+
+    # by users, so it must be writeable by the user that the web server
+
+    # is running as (usually 'nobody').  Permissions should be set at the
+
+    # directory level instead of on the file, as the file is deleted every
+
+    # time its contents are processed.
+
+
+    command_file=/opt/nagios/var/rw/nagios.cmd
+
+
+
+
+    # QUERY HANDLER INTERFACE
+
+    # This is the socket that is created for the Query Handler interface
+
+
+    #query_socket=/opt/nagios/var/rw/nagios.qh
+
+
+
+
+    # LOCK FILE
+
+    # This is the lockfile that Nagios will use to store its PID number
+
+    # in when it is running in daemon mode.
+
+
+    lock_file=/run/nagios.lock
+
+
+
+
+    # TEMP FILE
+
+    # This is a temporary file that is used as scratch space when Nagios
+
+    # updates the status log, cleans the comment file, etc.  This file
+
+    # is created, used, and deleted throughout the time that Nagios is
+
+    # running.
+
+
+    temp_file=/opt/nagios/var/nagios.tmp
+
+
+
+
+    # TEMP PATH
+
+    # This is path where Nagios can create temp files for service and
+
+    # host check results, etc.
+
+
+    temp_path=/tmp
+
+
+
+
+    # EVENT BROKER OPTIONS
+
+    # Controls what (if any) data gets sent to the event broker.
+
+    # Values:  0      = Broker nothing
+
+    #         -1      = Broker everything
+
+    #         <other> = See documentation
+
+
+    event_broker_options=-1
+
+
+
+
+    # EVENT BROKER MODULE(S)
+
+    # This directive is used to specify an event broker module that should
+
+    # by loaded by Nagios at startup.  Use multiple directives if you want
+
+    # to load more than one module.  Arguments that should be passed to
+
+    # the module at startup are separated from the module path by a space.
+
+    #
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    # WARNING !!! WARNING !!! WARNING !!! WARNING !!! WARNING !!! WARNING
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    #
+
+    # Do NOT overwrite modules while they are being used by Nagios or Nagios
+
+    # will crash in a fiery display of SEGFAULT glory.  This is a bug/limitation
+
+    # either in dlopen(), the kernel, and/or the filesystem.  And maybe Nagios...
+
+    #
+
+    # The correct/safe way of updating a module is by using one of these methods:
+
+    #    1. Shutdown Nagios, replace the module file, restart Nagios
+
+    #    2. Delete the original module file, move the new module file into place,
+
+    #\trestart Nagios
+
+    #
+
+    # Example:
+
+    #
+
+    #   broker_module=<modulepath> [moduleargs]
+
+
+    #broker_module=/somewhere/module1.o
+
+    #broker_module=/somewhere/module2.o arg1 arg2=3 debug=0
+
+
+
+
+    # LOG ROTATION METHOD
+
+    # This is the log rotation method that Nagios should use to rotate
+
+    # the main log file. Values are as follows..
+
+    #\tn\t= None - don't rotate the log
+
+    #\th\t= Hourly rotation (top of the hour)
+
+    #\td\t= Daily rotation (midnight every day)
+
+    #\tw\t= Weekly rotation (midnight on Saturday evening)
+
+    #\tm\t= Monthly rotation (midnight last day of month)
+
+
+    log_rotation_method=d
+
+
+
+
+    # LOG ARCHIVE PATH
+
+    # This is the directory where archived (rotated) log files should be
+
+    # placed (assuming you've chosen to do log rotation).
+
+
+    log_archive_path=/opt/nagios/var/archives
+
+
+
+
+    # LOGGING OPTIONS
+
+    # If you want messages logged to the syslog facility, as well as the
+
+    # Nagios log file set this option to 1.  If not, set it to 0.
+
+
+    use_syslog=1
+
+
+
+
+    # NOTIFICATION LOGGING OPTION
+
+    # If you don't want notifications to be logged, set this value to 0.
+
+    # If notifications should be logged, set the value to 1.
+
+
+    log_notifications=1
+
+
+
+
+    # SERVICE RETRY LOGGING OPTION
+
+    # If you don't want service check retries to be logged, set this value
+
+    # to 0.  If retries should be logged, set the value to 1.
+
+
+    log_service_retries=1
+
+
+
+
+    # HOST RETRY LOGGING OPTION
+
+    # If you don't want host check retries to be logged, set this value to
+
+    # 0.  If retries should be logged, set the value to 1.
+
+
+    log_host_retries=1
+
+
+
+
+    # EVENT HANDLER LOGGING OPTION
+
+    # If you don't want host and service event handlers to be logged, set
+
+    # this value to 0.  If event handlers should be logged, set the value
+
+    # to 1.
+
+
+    log_event_handlers=1
+
+
+
+
+    # INITIAL STATES LOGGING OPTION
+
+    # If you want Nagios to log all initial host and service states to
+
+    # the main log file (the first time the service or host is checked)
+
+    # you can enable this option by setting this value to 1.  If you
+
+    # are not using an external application that does long term state
+
+    # statistics reporting, you do not need to enable this option.  In
+
+    # this case, set the value to 0.
+
+
+    log_initial_states=0
+
+
+
+
+    # CURRENT STATES LOGGING OPTION
+
+    # If you don't want Nagios to log all current host and service states
+
+    # after log has been rotated to the main log file, you can disable this
+
+    # option by setting this value to 0. Default value is 1.
+
+
+    log_current_states=1
+
+
+
+
+    # EXTERNAL COMMANDS LOGGING OPTION
+
+    # If you don't want Nagios to log external commands, set this value
+
+    # to 0.  If external commands should be logged, set this value to 1.
+
+    # Note: This option does not include logging of passive service
+
+    # checks - see the option below for controlling whether or not
+
+    # passive checks are logged.
+
+
+    log_external_commands=1
+
+
+
+
+    # PASSIVE CHECKS LOGGING OPTION
+
+    # If you don't want Nagios to log passive host and service checks, set
+
+    # this value to 0.  If passive checks should be logged, set
+
+    # this value to 1.
+
+
+    log_passive_checks=1
+
+
+
+
+    # GLOBAL HOST AND SERVICE EVENT HANDLERS
+
+    # These options allow you to specify a host and service event handler
+
+    # command that is to be run for every host or service state change.
+
+    # The global event handler is executed immediately prior to the event
+
+    # handler that you have optionally specified in each host or
+
+    # service definition. The command argument is the short name of a
+
+    # command definition that you define in your host configuration file.
+
+    # Read the HTML docs for more information.
+
+
+    #global_host_event_handler=somecommand
+
+    #global_service_event_handler=somecommand
+
+
+
+
+    # SERVICE INTER-CHECK DELAY METHOD
+
+    # This is the method that Nagios should use when initially
+
+    # \"spreading out\" service checks when it starts monitoring.  The
+
+    # default is to use smart delay calculation, which will try to
+
+    # space all service checks out evenly to minimize CPU load.
+
+    # Using the dumb setting will cause all checks to be scheduled
+
+    # at the same time (with no delay between them)!  This is not a
+
+    # good thing for production, but is useful when testing the
+
+    # parallelization functionality.
+
+    #\tn\t= None - don't use any delay between checks
+
+    #\td\t= Use a \"dumb\" delay of 1 second between checks
+
+    #\ts\t= Use \"smart\" inter-check delay calculation
+
+    #       x.xx    = Use an inter-check delay of x.xx seconds
+
+
+    service_inter_check_delay_method=s
+
+
+
+
+    # MAXIMUM SERVICE CHECK SPREAD
+
+    # This variable determines the timeframe (in minutes) from the
+
+    # program start time that an initial check of all services should
+
+    # be completed.  Default is 30 minutes.
+
+
+    max_service_check_spread=30
+
+
+
+
+    # SERVICE CHECK INTERLEAVE FACTOR
+
+    # This variable determines how service checks are interleaved.
+
+    # Interleaving the service checks allows for a more even
+
+    # distribution of service checks and reduced load on remote
+
+    # hosts.  Setting this value to 1 is equivalent to how versions
+
+    # of Nagios previous to 0.0.5 did service checks.  Set this
+
+    # value to s (smart) for automatic calculation of the interleave
+
+    # factor unless you have a specific reason to change it.
+
+    #       s       = Use \"smart\" interleave factor calculation
+
+    #       x       = Use an interleave factor of x, where x is a
+
+    #                 number greater than or equal to 1.
+
+
+    service_interleave_factor=s
+
+
+
+
+    # HOST INTER-CHECK DELAY METHOD
+
+    # This is the method that Nagios should use when initially
+
+    # \"spreading out\" host checks when it starts monitoring.  The
+
+    # default is to use smart delay calculation, which will try to
+
+    # space all host checks out evenly to minimize CPU load.
+
+    # Using the dumb setting will cause all checks to be scheduled
+
+    # at the same time (with no delay between them)!
+
+    #\tn\t= None - don't use any delay between checks
+
+    #\td\t= Use a \"dumb\" delay of 1 second between checks
+
+    #\ts\t= Use \"smart\" inter-check delay calculation
+
+    #       x.xx    = Use an inter-check delay of x.xx seconds
+
+
+    host_inter_check_delay_method=s
+
+
+
+
+    # MAXIMUM HOST CHECK SPREAD
+
+    # This variable determines the timeframe (in minutes) from the
+
+    # program start time that an initial check of all hosts should
+
+    # be completed.  Default is 30 minutes.
+
+
+    max_host_check_spread=30
+
+
+
+
+    # MAXIMUM CONCURRENT SERVICE CHECKS
+
+    # This option allows you to specify the maximum number of
+
+    # service checks that can be run in parallel at any given time.
+
+    # Specifying a value of 1 for this variable essentially prevents
+
+    # any service checks from being parallelized.  A value of 0
+
+    # will not restrict the number of concurrent checks that are
+
+    # being executed.
+
+
+    max_concurrent_checks=0
+
+
+
+
+    # HOST AND SERVICE CHECK REAPER FREQUENCY
+
+    # This is the frequency (in seconds!) that Nagios will process
+
+    # the results of host and service checks.
+
+
+    check_result_reaper_frequency=10
+
+
+
+
+
+    # MAX CHECK RESULT REAPER TIME
+
+    # This is the max amount of time (in seconds) that  a single
+
+    # check result reaper event will be allowed to run before
+
+    # returning control back to Nagios so it can perform other
+
+    # duties.
+
+
+    max_check_result_reaper_time=30
+
+
+
+
+
+    # CHECK RESULT PATH
+
+    # This is directory where Nagios stores the results of host and
+
+    # service checks that have not yet been processed.
+
+    #
+
+    # Note: Make sure that only one instance of Nagios has access
+
+    # to this directory!
+
+
+    check_result_path=/opt/nagios/var/spool/checkresults
+
+
+
+
+
+    # MAX CHECK RESULT FILE AGE
+
+    # This option determines the maximum age (in seconds) which check
+
+    # result files are considered to be valid.  Files older than this
+
+    # threshold will be mercilessly deleted without further processing.
+
+
+    max_check_result_file_age=3600
+
+
+
+
+
+    # CACHED HOST CHECK HORIZON
+
+    # This option determines the maximum amount of time (in seconds)
+
+    # that the state of a previous host check is considered current.
+
+    # Cached host states (from host checks that were performed more
+
+    # recently that the timeframe specified by this value) can immensely
+
+    # improve performance in regards to the host check logic.
+
+    # Too high of a value for this option may result in inaccurate host
+
+    # states being used by Nagios, while a lower value may result in a
+
+    # performance hit for host checks.  Use a value of 0 to disable host
+
+    # check caching.
+
+
+    cached_host_check_horizon=15
+
+
+
+
+    # CACHED SERVICE CHECK HORIZON
+
+    # This option determines the maximum amount of time (in seconds)
+
+    # that the state of a previous service check is considered current.
+
+    # Cached service states (from service checks that were performed more
+
+    # recently that the timeframe specified by this value) can immensely
+
+    # improve performance in regards to predictive dependency checks.
+
+    # Use a value of 0 to disable service check caching.
+
+
+    cached_service_check_horizon=15
+
+
+
+
+    # ENABLE PREDICTIVE HOST DEPENDENCY CHECKS
+
+    # This option determines whether or not Nagios will attempt to execute
+
+    # checks of hosts when it predicts that future dependency logic test
+
+    # may be needed.  These predictive checks can help ensure that your
+
+    # host dependency logic works well.
+
+    # Values:
+
+    #  0 = Disable predictive checks
+
+    #  1 = Enable predictive checks (default)
+
+
+    enable_predictive_host_dependency_checks=1
+
+
+
+
+    # ENABLE PREDICTIVE SERVICE DEPENDENCY CHECKS
+
+    # This option determines whether or not Nagios will attempt to execute
+
+    # checks of service when it predicts that future dependency logic test
+
+    # may be needed.  These predictive checks can help ensure that your
+
+    # service dependency logic works well.
+
+    # Values:
+
+    #  0 = Disable predictive checks
+
+    #  1 = Enable predictive checks (default)
+
+
+    enable_predictive_service_dependency_checks=1
+
+
+
+
+    # SOFT STATE DEPENDENCIES
+
+    # This option determines whether or not Nagios will use soft state
+
+    # information when checking host and service dependencies. Normally
+
+    # Nagios will only use the latest hard host or service state when
+
+    # checking dependencies. If you want it to use the latest state (regardless
+
+    # of whether its a soft or hard state type), enable this option.
+
+    # Values:
+
+    #  0 = Don't use soft state dependencies (default)
+
+    #  1 = Use soft state dependencies
+
+
+    soft_state_dependencies=0
+
+
+
+
+    # TIME CHANGE ADJUSTMENT THRESHOLDS
+
+    # These options determine when Nagios will react to detected changes
+
+    # in system time (either forward or backwards).
+
+
+    #time_change_threshold=900
+
+
+
+
+    # AUTO-RESCHEDULING OPTION
+
+    # This option determines whether or not Nagios will attempt to
+
+    # automatically reschedule active host and service checks to
+
+    # \"smooth\" them out over time.  This can help balance the load on
+
+    # the monitoring server.
+
+    # WARNING: THIS IS AN EXPERIMENTAL FEATURE - IT CAN DEGRADE
+
+    # PERFORMANCE, RATHER THAN INCREASE IT, IF USED IMPROPERLY
+
+
+    auto_reschedule_checks=0
+
+
+
+
+    # AUTO-RESCHEDULING INTERVAL
+
+    # This option determines how often (in seconds) Nagios will
+
+    # attempt to automatically reschedule checks.  This option only
+
+    # has an effect if the auto_reschedule_checks option is enabled.
+
+    # Default is 30 seconds.
+
+    # WARNING: THIS IS AN EXPERIMENTAL FEATURE - IT CAN DEGRADE
+
+    # PERFORMANCE, RATHER THAN INCREASE IT, IF USED IMPROPERLY
+
+
+    auto_rescheduling_interval=30
+
+
+
+
+    # AUTO-RESCHEDULING WINDOW
+
+    # This option determines the \"window\" of time (in seconds) that
+
+    # Nagios will look at when automatically rescheduling checks.
+
+    # Only host and service checks that occur in the next X seconds
+
+    # (determined by this variable) will be rescheduled. This option
+
+    # only has an effect if the auto_reschedule_checks option is
+
+    # enabled.  Default is 180 seconds (3 minutes).
+
+    # WARNING: THIS IS AN EXPERIMENTAL FEATURE - IT CAN DEGRADE
+
+    # PERFORMANCE, RATHER THAN INCREASE IT, IF USED IMPROPERLY
+
+
+    auto_rescheduling_window=180
+
+
+
+
+    # TIMEOUT VALUES
+
+    # These options control how much time Nagios will allow various
+
+    # types of commands to execute before killing them off.  Options
+
+    # are available for controlling maximum time allotted for
+
+    # service checks, host checks, event handlers, notifications, the
+
+    # ocsp command, and performance data commands.  All values are in
+
+    # seconds.
+
+
+    service_check_timeout=60
+
+    host_check_timeout=30
+
+    event_handler_timeout=30
+
+    notification_timeout=30
+
+    ocsp_timeout=5
+
+    ochp_timeout=5
+
+    perfdata_timeout=5
+
+
+
+
+    # RETAIN STATE INFORMATION
+
+    # This setting determines whether or not Nagios will save state
+
+    # information for services and hosts before it shuts down.  Upon
+
+    # startup Nagios will reload all saved service and host state
+
+    # information before starting to monitor.  This is useful for
+
+    # maintaining long-term data on state statistics, etc, but will
+
+    # slow Nagios down a bit when it (re)starts.  Since its only
+
+    # a one-time penalty, I think its well worth the additional
+
+    # startup delay.
+
+
+    retain_state_information=1
+
+
+
+
+    # STATE RETENTION FILE
+
+    # This is the file that Nagios should use to store host and
+
+    # service state information before it shuts down.  The state
+
+    # information in this file is also read immediately prior to
+
+    # starting to monitor the network when Nagios is restarted.
+
+    # This file is used only if the retain_state_information
+
+    # variable is set to 1.
+
+
+    state_retention_file=/opt/nagios/var/retention.dat
+
+
+
+
+    # RETENTION DATA UPDATE INTERVAL
+
+    # This setting determines how often (in minutes) that Nagios
+
+    # will automatically save retention data during normal operation.
+
+    # If you set this value to 0, Nagios will not save retention
+
+    # data at regular interval, but it will still save retention
+
+    # data before shutting down or restarting.  If you have disabled
+
+    # state retention, this option has no effect.
+
+
+    retention_update_interval=60
+
+
+
+
+    # USE RETAINED PROGRAM STATE
+
+    # This setting determines whether or not Nagios will set
+
+    # program status variables based on the values saved in the
+
+    # retention file.  If you want to use retained program status
+
+    # information, set this value to 1.  If not, set this value
+
+    # to 0.
+
+
+    use_retained_program_state=1
+
+
+
+
+    # USE RETAINED SCHEDULING INFO
+
+    # This setting determines whether or not Nagios will retain
+
+    # the scheduling info (next check time) for hosts and services
+
+    # based on the values saved in the retention file.  If you
+
+    # If you want to use retained scheduling info, set this
+
+    # value to 1.  If not, set this value to 0.
+
+
+    use_retained_scheduling_info=1
+
+
+
+
+    # RETAINED ATTRIBUTE MASKS (ADVANCED FEATURE)
+
+    # The following variables are used to specify specific host and
+
+    # service attributes that should *not* be retained by Nagios during
+
+    # program restarts.
+
+    #
+
+    # The values of the masks are bitwise ANDs of values specified
+
+    # by the \"MODATTR_\" definitions found in include/common.h.
+
+    # For example, if you do not want the current enabled/disabled state
+
+    # of flap detection and event handlers for hosts to be retained, you
+
+    # would use a value of 24 for the host attribute mask...
+
+    # MODATTR_EVENT_HANDLER_ENABLED (8) + MODATTR_FLAP_DETECTION_ENABLED (16) = 24
+
+
+    # This mask determines what host attributes are not retained
+
+    retained_host_attribute_mask=0
+
+
+    # This mask determines what service attributes are not retained
+
+    retained_service_attribute_mask=0
+
+
+    # These two masks determine what process attributes are not retained.
+
+    # There are two masks, because some process attributes have host and service
+
+    # options.  For example, you can disable active host checks, but leave active
+
+    # service checks enabled.
+
+    retained_process_host_attribute_mask=0
+
+    retained_process_service_attribute_mask=0
+
+
+    # These two masks determine what contact attributes are not retained.
+
+    # There are two masks, because some contact attributes have host and
+
+    # service options.  For example, you can disable host notifications for
+
+    # a contact, but leave service notifications enabled for them.
+
+    retained_contact_host_attribute_mask=0
+
+    retained_contact_service_attribute_mask=0
+
+
+
+
+    # INTERVAL LENGTH
+
+    # This is the seconds per unit interval as used in the
+
+    # host/contact/service configuration files.  Setting this to 60 means
+
+    # that each interval is one minute long (60 seconds).  Other settings
+
+    # have not been tested much, so your mileage is likely to vary...
+
+
+    interval_length=60
+
+
+
+
+    # CHECK FOR UPDATES
+
+    # This option determines whether Nagios will automatically check to
+
+    # see if new updates (releases) are available.  It is recommend that you
+
+    # enable this option to ensure that you stay on top of the latest critical
+
+    # patches to Nagios.  Nagios is critical to you - make sure you keep it in
+
+    # good shape.  Nagios will check once a day for new updates. Data collected
+
+    # by Nagios Enterprises from the update check is processed in accordance
+
+    # with our privacy policy - see https://api.nagios.org for details.
+
+
+    check_for_updates=1
+
+
+
+
+    # BARE UPDATE CHECK
+
+    # This option determines what data Nagios will send to api.nagios.org when
+
+    # it checks for updates.  By default, Nagios will send information on the
+
+    # current version of Nagios you have installed, as well as an indicator as
+
+    # to whether this was a new installation or not.  Nagios Enterprises uses
+
+    # this data to determine the number of users running specific version of
+
+    # Nagios.  Enable this option if you do not want this information to be sent.
+
+
+    bare_update_check=0
+
+
+
+
+    # AGGRESSIVE HOST CHECKING OPTION
+
+    # If you don't want to turn on aggressive host checking features, set
+
+    # this value to 0 (the default).  Otherwise set this value to 1 to
+
+    # enable the aggressive check option.  Read the docs for more info
+
+    # on what aggressive host check is or check out the source code in
+
+    # base/checks.c
+
+
+    use_aggressive_host_checking=0
+
+
+
+
+    # SERVICE CHECK EXECUTION OPTION
+
+    # This determines whether or not Nagios will actively execute
+
+    # service checks when it initially starts.  If this option is
+
+    # disabled, checks are not actively made, but Nagios can still
+
+    # receive and process passive check results that come in.  Unless
+
+    # you're implementing redundant hosts or have a special need for
+
+    # disabling the execution of service checks, leave this enabled!
+
+    # Values: 1 = enable checks, 0 = disable checks
+
+
+    execute_service_checks=1
+
+
+
+
+    # PASSIVE SERVICE CHECK ACCEPTANCE OPTION
+
+    # This determines whether or not Nagios will accept passive
+
+    # service checks results when it initially (re)starts.
+
+    # Values: 1 = accept passive checks, 0 = reject passive checks
+
+
+    accept_passive_service_checks=1
+
+
+
+
+    # HOST CHECK EXECUTION OPTION
+
+    # This determines whether or not Nagios will actively execute
+
+    # host checks when it initially starts.  If this option is
+
+    # disabled, checks are not actively made, but Nagios can still
+
+    # receive and process passive check results that come in.  Unless
+
+    # you're implementing redundant hosts or have a special need for
+
+    # disabling the execution of host checks, leave this enabled!
+
+    # Values: 1 = enable checks, 0 = disable checks
+
+
+    execute_host_checks=1
+
+
+
+
+    # PASSIVE HOST CHECK ACCEPTANCE OPTION
+
+    # This determines whether or not Nagios will accept passive
+
+    # host checks results when it initially (re)starts.
+
+    # Values: 1 = accept passive checks, 0 = reject passive checks
+
+
+    accept_passive_host_checks=1
+
+
+
+
+    # NOTIFICATIONS OPTION
+
+    # This determines whether or not Nagios will sent out any host or
+
+    # service notifications when it is initially (re)started.
+
+    # Values: 1 = enable notifications, 0 = disable notifications
+
+
+    enable_notifications=1
+
+
+
+
+    # EVENT HANDLER USE OPTION
+
+    # This determines whether or not Nagios will run any host or
+
+    # service event handlers when it is initially (re)started.  Unless
+
+    # you're implementing redundant hosts, leave this option enabled.
+
+    # Values: 1 = enable event handlers, 0 = disable event handlers
+
+
+    enable_event_handlers=1
+
+
+
+
+    # PROCESS PERFORMANCE DATA OPTION
+
+    # This determines whether or not Nagios will process performance
+
+    # data returned from service and host checks.  If this option is
+
+    # enabled, host performance data will be processed using the
+
+    # host_perfdata_command (defined below) and service performance
+
+    # data will be processed using the service_perfdata_command (also
+
+    # defined below).  Read the HTML docs for more information on
+
+    # performance data.
+
+    # Values: 1 = process performance data, 0 = do not process performance data
+
+
+    process_performance_data=0
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA PROCESSING COMMANDS
+
+    # These commands are run after every host and service check is
+
+    # performed.  These commands are executed only if the
+
+    # enable_performance_data option (above) is set to 1.  The command
+
+    # argument is the short name of a command definition that you
+
+    # define in your host configuration file.  Read the HTML docs for
+
+    # more information on performance data.
+
+
+    #host_perfdata_command=process-host-perfdata
+
+    #service_perfdata_command=process-service-perfdata
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA FILES
+
+    # These files are used to store host and service performance data.
+
+    # Performance data is only written to these files if the
+
+    # enable_performance_data option (above) is set to 1.
+
+
+    #host_perfdata_file=/opt/nagios/var/host-perfdata
+
+    #service_perfdata_file=/opt/nagios/var/service-perfdata
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA FILE TEMPLATES
+
+    # These options determine what data is written (and how) to the
+
+    # performance data files.  The templates may contain macros, special
+
+    # characters (\\t for tab, \\r for carriage return, \\n for newline)
+
+    # and plain text.  A newline is automatically added after each write
+
+    # to the performance data file.  Some examples of what you can do are
+
+    # shown below.
+
+
+    #host_perfdata_file_template=[HOSTPERFDATA]\\t$TIMET$\\t$HOSTNAME$\\t$HOSTEXECUTIONTIME$\\t$HOSTOUTPUT$\\t$HOSTPERFDATA$
+
+    #service_perfdata_file_template=[SERVICEPERFDATA]\\t$TIMET$\\t$HOSTNAME$\\t$SERVICEDESC$\\t$SERVICEEXECUTIONTIME$\\t$SERVICELATENCY$\\t$SERVICEOUTPUT$\\t$SERVICEPERFDATA$
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA FILE MODES
+
+    # This option determines whether or not the host and service
+
+    # performance data files are opened in write (\"w\") or append (\"a\")
+
+    # mode. If you want to use named pipes, you should use the special
+
+    # pipe (\"p\") mode which avoid blocking at startup, otherwise you will
+
+    # likely want the default append (\"a\") mode.
+
+
+    #host_perfdata_file_mode=a
+
+    #service_perfdata_file_mode=a
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA FILE PROCESSING INTERVAL
+
+    # These options determine how often (in seconds) the host and service
+
+    # performance data files are processed using the commands defined
+
+    # below.  A value of 0 indicates the files should not be periodically
+
+    # processed.
+
+
+    #host_perfdata_file_processing_interval=0
+
+    #service_perfdata_file_processing_interval=0
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA FILE PROCESSING COMMANDS
+
+    # These commands are used to periodically process the host and
+
+    # service performance data files.  The interval at which the
+
+    # processing occurs is determined by the options above.
+
+
+    #host_perfdata_file_processing_command=process-host-perfdata-file
+
+    #service_perfdata_file_processing_command=process-service-perfdata-file
+
+
+
+
+    # HOST AND SERVICE PERFORMANCE DATA PROCESS EMPTY RESULTS
+
+    # These options determine whether the core will process empty perfdata
+
+    # results or not. This is needed for distributed monitoring, and intentionally
+
+    # turned on by default.
+
+    # If you don't require empty perfdata - saving some cpu cycles
+
+    # on unwanted macro calculation - you can turn that off. Be careful!
+
+    # Values: 1 = enable, 0 = disable
+
+
+    #host_perfdata_process_empty_results=1
+
+    #service_perfdata_process_empty_results=1
+
+
+
+    # OBSESS OVER SERVICE CHECKS OPTION
+
+    # This determines whether or not Nagios will obsess over service
+
+    # checks and run the ocsp_command defined below.  Unless you're
+
+    # planning on implementing distributed monitoring, do not enable
+
+    # this option.  Read the HTML docs for more information on
+
+    # implementing distributed monitoring.
+
+    # Values: 1 = obsess over services, 0 = do not obsess (default)
+
+
+    obsess_over_services=0
+
+
+
+
+    # OBSESSIVE COMPULSIVE SERVICE PROCESSOR COMMAND
+
+    # This is the command that is run for every service check that is
+
+    # processed by Nagios.  This command is executed only if the
+
+    # obsess_over_services option (above) is set to 1.  The command
+
+    # argument is the short name of a command definition that you
+
+    # define in your host configuration file. Read the HTML docs for
+
+    # more information on implementing distributed monitoring.
+
+
+    #ocsp_command=somecommand
+
+
+
+
+    # OBSESS OVER HOST CHECKS OPTION
+
+    # This determines whether or not Nagios will obsess over host
+
+    # checks and run the ochp_command defined below.  Unless you're
+
+    # planning on implementing distributed monitoring, do not enable
+
+    # this option.  Read the HTML docs for more information on
+
+    # implementing distributed monitoring.
+
+    # Values: 1 = obsess over hosts, 0 = do not obsess (default)
+
+
+    obsess_over_hosts=0
+
+
+
+
+    # OBSESSIVE COMPULSIVE HOST PROCESSOR COMMAND
+
+    # This is the command that is run for every host check that is
+
+    # processed by Nagios.  This command is executed only if the
+
+    # obsess_over_hosts option (above) is set to 1.  The command
+
+    # argument is the short name of a command definition that you
+
+    # define in your host configuration file. Read the HTML docs for
+
+    # more information on implementing distributed monitoring.
+
+
+    #ochp_command=somecommand
+
+
+
+
+    # TRANSLATE PASSIVE HOST CHECKS OPTION
+
+    # This determines whether or not Nagios will translate
+
+    # DOWN/UNREACHABLE passive host check results into their proper
+
+    # state for this instance of Nagios.  This option is useful
+
+    # if you have distributed or failover monitoring setup.  In
+
+    # these cases your other Nagios servers probably have a different
+
+    # \"view\" of the network, with regards to the parent/child relationship
+
+    # of hosts.  If a distributed monitoring server thinks a host
+
+    # is DOWN, it may actually be UNREACHABLE from the point of
+
+    # this Nagios instance.  Enabling this option will tell Nagios
+
+    # to translate any DOWN or UNREACHABLE host states it receives
+
+    # passively into the correct state from the view of this server.
+
+    # Values: 1 = perform translation, 0 = do not translate (default)
+
+
+    translate_passive_host_checks=0
+
+
+
+
+    # PASSIVE HOST CHECKS ARE SOFT OPTION
+
+    # This determines whether or not Nagios will treat passive host
+
+    # checks as being HARD or SOFT.  By default, a passive host check
+
+    # result will put a host into a HARD state type.  This can be changed
+
+    # by enabling this option.
+
+    # Values: 0 = passive checks are HARD, 1 = passive checks are SOFT
+
+
+    passive_host_checks_are_soft=0
+
+
+
+
+    # ORPHANED HOST/SERVICE CHECK OPTIONS
+
+    # These options determine whether or not Nagios will periodically
+
+    # check for orphaned host service checks.  Since service checks are
+
+    # not rescheduled until the results of their previous execution
+
+    # instance are processed, there exists a possibility that some
+
+    # checks may never get rescheduled.  A similar situation exists for
+
+    # host checks, although the exact scheduling details differ a bit
+
+    # from service checks.  Orphaned checks seem to be a rare
+
+    # problem and should not happen under normal circumstances.
+
+    # If you have problems with service checks never getting
+
+    # rescheduled, make sure you have orphaned service checks enabled.
+
+    # Values: 1 = enable checks, 0 = disable checks
+
+
+    check_for_orphaned_services=1
+
+    check_for_orphaned_hosts=1
+
+
+
+
+    # SERVICE FRESHNESS CHECK OPTION
+
+    # This option determines whether or not Nagios will periodically
+
+    # check the \"freshness\" of service results.  Enabling this option
+
+    # is useful for ensuring passive checks are received in a timely
+
+    # manner.
+
+    # Values: 1 = enabled freshness checking, 0 = disable freshness checking
+
+
+    check_service_freshness=1
+
+
+
+
+    # SERVICE FRESHNESS CHECK INTERVAL
+
+    # This setting determines how often (in seconds) Nagios will
+
+    # check the \"freshness\" of service check results.  If you have
+
+    # disabled service freshness checking, this option has no effect.
+
+
+    service_freshness_check_interval=60
+
+
+
+
+    # SERVICE CHECK TIMEOUT STATE
+
+    # This setting determines the state Nagios will report when a
+
+    # service check times out - that is does not respond within
+
+    # service_check_timeout seconds.  This can be useful if a
+
+    # machine is running at too high a load and you do not want
+
+    # to consider a failed service check to be critical (the default).
+
+    # Valid settings are:
+
+    # c - Critical (default)
+
+    # u - Unknown
+
+    # w - Warning
+
+    # o - OK
+
+
+    service_check_timeout_state=c
+
+
+
+
+    # HOST FRESHNESS CHECK OPTION
+
+    # This option determines whether or not Nagios will periodically
+
+    # check the \"freshness\" of host results.  Enabling this option
+
+    # is useful for ensuring passive checks are received in a timely
+
+    # manner.
+
+    # Values: 1 = enabled freshness checking, 0 = disable freshness checking
+
+
+    check_host_freshness=0
+
+
+
+
+    # HOST FRESHNESS CHECK INTERVAL
+
+    # This setting determines how often (in seconds) Nagios will
+
+    # check the \"freshness\" of host check results.  If you have
+
+    # disabled host freshness checking, this option has no effect.
+
+
+    host_freshness_check_interval=60
+
+
+
+
+
+    # ADDITIONAL FRESHNESS THRESHOLD LATENCY
+
+    # This setting determines the number of seconds that Nagios
+
+    # will add to any host and service freshness thresholds that
+
+    # it calculates (those not explicitly specified by the user).
+
+
+    additional_freshness_latency=15
+
+
+
+
+
+    # FLAP DETECTION OPTION
+
+    # This option determines whether or not Nagios will try
+
+    # and detect hosts and services that are \"flapping\".
+
+    # Flapping occurs when a host or service changes between
+
+    # states too frequently.  When Nagios detects that a
+
+    # host or service is flapping, it will temporarily suppress
+
+    # notifications for that host/service until it stops
+
+    # flapping.  Flap detection is very experimental, so read
+
+    # the HTML documentation before enabling this feature!
+
+    # Values: 1 = enable flap detection
+
+    #         0 = disable flap detection (default)
+
+
+    enable_flap_detection=1
+
+
+
+
+    # FLAP DETECTION THRESHOLDS FOR HOSTS AND SERVICES
+
+    # Read the HTML documentation on flap detection for
+
+    # an explanation of what this option does.  This option
+
+    # has no effect if flap detection is disabled.
+
+
+    low_service_flap_threshold=5.0
+
+    high_service_flap_threshold=20.0
+
+    low_host_flap_threshold=5.0
+
+    high_host_flap_threshold=20.0
+
+
+
+
+    # DATE FORMAT OPTION
+
+    # This option determines how short dates are displayed. Valid options
+
+    # include:
+
+    #\tus\t\t(MM-DD-YYYY HH:MM:SS)
+
+    #\teuro    \t(DD-MM-YYYY HH:MM:SS)
+
+    #\tiso8601\t\t(YYYY-MM-DD HH:MM:SS)
+
+    #\tstrict-iso8601\t(YYYY-MM-DDTHH:MM:SS)
+
+    #
+
+
+    date_format=iso8601
+
+
+
+
+
+    # TIMEZONE OFFSET
+
+    # This option is used to override the default timezone that this
+
+    # instance of Nagios runs in.  If not specified, Nagios will use
+
+    # the system configured timezone.
+
+    #
+
+    # NOTE: In order to display the correct timezone in the CGIs, you
+
+    # will also need to alter the Apache directives for the CGI path
+
+    # to include your timezone.  Example:
+
+    #
+
+    #   <Directory \"/usr/local/nagios/sbin/\">
+
+    #      SetEnv TZ \"Australia/Brisbane\"
+
+    #      ...
+
+    #   </Directory>
+
+
+    #use_timezone=US/Mountain
+
+    #use_timezone=Australia/Brisbane
+
+
+
+
+    # ILLEGAL OBJECT NAME CHARACTERS
+
+    # This option allows you to specify illegal characters that cannot
+
+    # be used in host names, service descriptions, or names of other
+
+    # object types.
+
+
+    illegal_object_name_chars=`~!$%^&*|'\"<>?,()=
+
+
+
+
+    # ILLEGAL MACRO OUTPUT CHARACTERS
+
+    # This option allows you to specify illegal characters that are
+
+    # stripped from macros before being used in notifications, event
+
+    # handlers, etc.  This DOES NOT affect macros used in service or
+
+    # host check commands.
+
+    # The following macros are stripped of the characters you specify:
+
+    #\t$HOSTOUTPUT$
+
+    #\t$LONGHOSTOUTPUT$
+
+    #\t$HOSTPERFDATA$
+
+    #\t$HOSTACKAUTHOR$
+
+    #\t$HOSTACKCOMMENT$
+
+    #\t$SERVICEOUTPUT$
+
+    #\t$LONGSERVICEOUTPUT$
+
+    #\t$SERVICEPERFDATA$
+
+    #\t$SERVICEACKAUTHOR$
+
+    #\t$SERVICEACKCOMMENT$
+
+
+    illegal_macro_output_chars=`~$&|'\"<>
+
+
+
+
+    # REGULAR EXPRESSION MATCHING
+
+    # This option controls whether or not regular expression matching
+
+    # takes place in the object config files.  Regular expression
+
+    # matching is used to match host, hostgroup, service, and service
+
+    # group names/descriptions in some fields of various object types.
+
+    # Values: 1 = enable regexp matching, 0 = disable regexp matching
+
+
+    use_regexp_matching=0
+
+
+
+
+    # \"TRUE\" REGULAR EXPRESSION MATCHING
+
+    # This option controls whether or not \"true\" regular expression
+
+    # matching takes place in the object config files.  This option
+
+    # only has an effect if regular expression matching is enabled
+
+    # (see above).  If this option is DISABLED, regular expression
+
+    # matching only occurs if a string contains wildcard characters
+
+    # (* and ?).  If the option is ENABLED, regexp matching occurs
+
+    # all the time (which can be annoying).
+
+    # Values: 1 = enable true matching, 0 = disable true matching
+
+
+    use_true_regexp_matching=0
+
+
+
+
+    # ADMINISTRATOR EMAIL/PAGER ADDRESSES
+
+    # The email and pager address of a global administrator (likely you).
+
+    # Nagios never uses these values itself, but you can access them by
+
+    # using the $ADMINEMAIL$ and $ADMINPAGER$ macros in your notification
+
+    # commands.
+
+
+    admin_email=nagios@localhost
+
+    admin_pager=pagenagios@localhost
+
+
+
+
+    # DAEMON CORE DUMP OPTION
+
+    # This option determines whether or not Nagios is allowed to create
+
+    # a core dump when it runs as a daemon.  Note that it is generally
+
+    # considered bad form to allow this, but it may be useful for
+
+    # debugging purposes.  Enabling this option doesn't guarantee that
+
+    # a core file will be produced, but that's just life...
+
+    # Values: 1 - Allow core dumps
+
+    #         0 - Do not allow core dumps (default)
+
+
+    daemon_dumps_core=0
+
+
+
+
+    # LARGE INSTALLATION TWEAKS OPTION
+
+    # This option determines whether or not Nagios will take some shortcuts
+
+    # which can save on memory and CPU usage in large Nagios installations.
+
+    # Read the documentation for more information on the benefits/tradeoffs
+
+    # of enabling this option.
+
+    # Values: 1 - Enabled tweaks
+
+    #         0 - Disable tweaks (default)
+
+
+    use_large_installation_tweaks=0
+
+
+
+
+    # ENABLE ENVIRONMENT MACROS
+
+    # This option determines whether or not Nagios will make all standard
+
+    # macros available as environment variables when host/service checks
+
+    # and system commands (event handlers, notifications, etc.) are
+
+    # executed.
+
+    # Enabling this is a very bad idea for anything but very small setups,
+
+    # as it means plugins, notification scripts and eventhandlers may run
+
+    # out of environment space. It will also cause a significant increase
+
+    # in CPU- and memory usage and drastically reduce the number of checks
+
+    # you can run.
+
+    # Values: 1 - Enable environment variable macros
+
+    #         0 - Disable environment variable macros (default)
+
+
+    enable_environment_macros=0
+
+
+
+
+    # CHILD PROCESS MEMORY OPTION
+
+    # This option determines whether or not Nagios will free memory in
+
+    # child processes (processed used to execute system commands and host/
+
+    # service checks).  If you specify a value here, it will override
+
+    # program defaults.
+
+    # Value: 1 - Free memory in child processes
+
+    #        0 - Do not free memory in child processes
+
+
+    #free_child_process_memory=1
+
+
+
+
+    # CHILD PROCESS FORKING BEHAVIOR
+
+    # This option determines how Nagios will fork child processes
+
+    # (used to execute system commands and host/service checks).  Normally
+
+    # child processes are fork()ed twice, which provides a very high level
+
+    # of isolation from problems.  Fork()ing once is probably enough and will
+
+    # save a great deal on CPU usage (in large installs), so you might
+
+    # want to consider using this.  If you specify a value here, it will
+
+    # program defaults.
+
+    # Value: 1 - Child processes fork() twice
+
+    #        0 - Child processes fork() just once
+
+
+    #child_processes_fork_twice=1
+
+
+
+
+    # DEBUG LEVEL
+
+    # This option determines how much (if any) debugging information will
+
+    # be written to the debug file.  OR values together to log multiple
+
+    # types of information.
+
+    # Values:
+
+    #         -1      = Everything
+
+    #          0      = Nothing
+
+    #          1      = Functions
+
+    #          2      = Configuration
+
+    #          4      = Process information
+
+    #          8      = Scheduled events
+
+    #          16     = Host/service checks
+
+    #          32     = Notifications
+
+    #          64     = Event broker
+
+    #          128    = External commands
+
+    #          256    = Commands
+
+    #          512    = Scheduled downtime
+
+    #          1024   = Comments
+
+    #          2048   = Macros
+
+    #          4096   = Interprocess communication
+
+    #          8192   = Scheduling
+
+    #          16384  = Workers
+
+
+    debug_level=0
+
+
+
+
+    # DEBUG VERBOSITY
+
+    # This option determines how verbose the debug log out will be.
+
+    # Values: 0 = Brief output
+
+    #         1 = More detailed
+
+    #         2 = Very detailed
+
+
+    debug_verbosity=1
+
+
+
+
+    # DEBUG FILE
+
+    # This option determines where Nagios should write debugging information.
+
+
+    debug_file=/opt/nagios/var/nagios.debug
+
+
+
+
+    # MAX DEBUG FILE SIZE
+
+    # This option determines the maximum size (in bytes) of the debug file.  If
+
+    # the file grows larger than this size, it will be renamed with a .old
+
+    # extension.  If a file already exists with a .old extension it will
+
+    # automatically be deleted.  This helps ensure your disk space usage doesn't
+
+    # get out of control when debugging Nagios.
+
+
+    max_debug_file_size=1000000
+
+
+
+
+    # Should we allow hostgroups to have no hosts, we default this to off since
+
+    # that was the old behavior
+
+
+    allow_empty_hostgroup_assignment=0
+
+
+
+
+    # Normally worker count is dynamically allocated based on 1.5 * number of cpu's
+
+    # with a minimum of 4 workers.  This value will override the defaults
+
+
+    #check_workers=3
+
+
+
+
+    # DISABLE SERVICE CHECKS WHEN HOST DOWN
+
+    # This option will disable all service checks if the host is not in an UP state
+
+    #
+
+    # While desirable in some environments, enabling this value can distort report
+
+    # values as the expected quantity of checks will not have been performed
+
+
+    #host_down_disable_service_checks=0
+
+
+
+
+    # SET SERVICE/HOST STATUS WHEN SERVICE CHECK SKIPPED
+
+    # These options will allow you to set the status of a service when its
+
+    # service check is skipped due to one of three reasons:
+
+    # 1) failed dependency check; 2) parent's status; 3) host not up
+
+    # Number 3 can only happen if 'host_down_disable_service_checks' above
+
+    # is set to 1.
+
+    # Valid values for the service* options are:
+
+    #     -1     Do not change the service status (default - same as before 4.4)
+
+    #      0     Set the service status to STATE_OK
+
+    #      1     Set the service status to STATE_WARNING
+
+    #      2     Set the service status to STATE_CRITICAL
+
+    #      3     Set the service status to STATE_UNKNOWN
+
+    # The host_skip_check_dependency_status option will allow you to set the
+
+    # status of a host when itscheck is skipped due to a failed dependency check.
+
+    # Valid values for the host_skip_check_dependency_status are:
+
+    #     -1     Do not change the service status (default - same as before 4.4)
+
+    #      0     Set the host status to STATE_UP
+
+    #      1     Set the host status to STATE_DOWN
+
+    #      2     Set the host status to STATE_UNREACHABLE
+
+    # We may add one or more statuses in the future.
+
+
+    #service_skip_check_dependency_status=-1
+
+    #service_skip_check_parent_status=-1
+
+    #service_skip_check_host_down_status=-1
+
+    #host_skip_check_dependency_status=-1
+
+
+
+
+    # LOAD CONTROL OPTIONS
+
+    # To get current defaults based on your system, issue this command to
+
+    # the query handler:
+
+    #    echo -e '@core loadctl\\0' | nc -U /usr/local/nagios/var/rw/nagios.qh
+
+    #
+
+    # Please note that used incorrectly these options can induce enormous latency.
+
+    #
+
+    # loadctl_options:
+
+    #   jobs_max        The maximum amount of jobs to run at one time
+
+    #   jobs_min        The minimum amount of jobs to run at one time
+
+    #   jobs_limit      The maximum amount of jobs the current load lets us run
+
+    #   backoff_limit   The minimum backoff_change
+
+    #   backoff_change  # of jobs to remove from jobs_limit when backing off
+
+    #   rampup_limit    Minimum rampup_change
+
+    #   rampup_change   # of jobs to add to jobs_limit when ramping up
+
+
+    #loadctl_options=jobs_max=100;backoff_limit=10;rampup_change=5
+
+    use_timezone=UTC\n"
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: nagios
+  name: nagios-etc
+  namespace: bootcamp

@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.37.0 (fb0539e64)
+  labels:
+    io.kompose.service: nagios
+  name: nagios
+  namespace: bootcamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nagios
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.37.0 (fb0539e64)
+      labels:
+        io.kompose.service: nagios
+    spec:
+      initContainers:
+      - name: copy-configs
+        image: manios/nagios:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Copying Nagios config files..."
+          # Copy default configs from the image
+          cp -rv /opt/nagios/etc/* /tmp/nagios-etc/
+          # Overlay our custom configs
+          cp -rvLf /opt/nagios/etc-template/* /tmp/nagios-etc/
+          # Copy objects directory
+          mkdir -p /tmp/nagios-etc/objects
+          cp -rvLf /opt/nagios/etc-objects-template/* /tmp/nagios-etc/objects/
+          chown -R nagios:nagios /tmp/nagios-etc
+          find /tmp/nagios-etc -type f -exec chmod 644 {} \;
+          find /tmp/nagios-etc -type d -exec chmod 755 {} \;
+          echo "Config files copied successfully"
+        volumeMounts:
+        - mountPath: /opt/nagios/etc-template
+          name: nagios-etc
+        - mountPath: /opt/nagios/etc-objects-template
+          name: nagios-objects
+        - mountPath: /tmp/nagios-etc
+          name: nagios-etc-writable
+      containers:
+      - args:
+        - /usr/local/bin/init_nagios.sh
+        env:
+        - name: APP_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: APP_HOST
+        - name: DB_SLAVE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: DB_SLAVE_HOST
+        - name: DB_MASTER_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: DB_MASTER_HOST
+        - name: NAGIOS_TIMEZONE
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: TZ
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_PASSWORD
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_USER
+        - name: NAGIOSADMIN_PASS
+          valueFrom:
+            secretKeyRef:
+              name: nagios-secrets
+              key: NAGIOSADMIN_PASS
+        - name: NAGIOSADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nagios-secrets
+              key: NAGIOSADMIN_USER
+        image: manios/nagios:latest
+        name: nagios
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /opt/nagios/etc-template
+          name: nagios-etc
+        - mountPath: /opt/nagios/etc
+          name: nagios-etc-writable
+        - mountPath: /usr/local/bin/init_nagios.sh
+          name: nagios-cm1
+          subPath: init_nagios.sh
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: nagios-etc
+        name: nagios-etc
+      - configMap:
+          name: nagios-objects
+        name: nagios-objects
+      - emptyDir: {}
+        name: nagios-etc-writable
+      - configMap:
+          items:
+          - key: init.sh
+            path: init_nagios.sh
+          defaultMode: 493
+          name: nagios-cm1
+        name: nagios-cm1

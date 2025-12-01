@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.37.0 (fb0539e64)
+  labels:
+    io.kompose.service: web
+  name: web
+  namespace: bootcamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.37.0 (fb0539e64)
+      labels:
+        io.kompose.service: web
+    spec:
+      containers:
+      - env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: MYSQL_DATABASE
+        - name: DB_READ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: DB_SLAVE_HOST
+        - name: DB_WRITE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: env
+              key: DB_MASTER_HOST
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_PASSWORD
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_USER
+        image: compose-web:latest
+        imagePullPolicy: Never
+        name: apache
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: web-cm0
+        - mountPath: /etc/apache2/sites-available/000-default.conf
+          name: web-cm1
+          subPath: 000-default.conf
+        - mountPath: /etc/ssl/certs/server.crt
+          name: web-cm2
+          subPath: server.crt
+        - mountPath: /etc/ssl/private/server.key
+          name: web-key
+          subPath: server.key
+        - mountPath: /etc/ssl/certs/ca.crt
+          name: ca-crt
+          subPath: ca.crt
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: web-cm0
+        name: web-cm0
+      - configMap:
+          items:
+          - key: 001-ssl.conf
+            path: 000-default.conf
+          name: web-cm1
+        name: web-cm1
+      - configMap:
+          items:
+          - key: server.crt
+            path: server.crt
+          name: web-cm2
+        name: web-cm2
+      - secret:
+          items:
+          - key: server.key
+            path: server.key
+          secretName: web.key
+        name: web-key
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: ca.crt
+        name: ca-crt

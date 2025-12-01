@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env
+  namespace: bootcamp
+  labels:
+    io.kompose.service: all
+data:
+  DB_MASTER_HOST: "db-master"
+  DB_SLAVE_HOST: "db-slave"
+  MYSQL_DATABASE: "task01"
+  APP_HOST: "apache"
+  TZ: "Europe/London"

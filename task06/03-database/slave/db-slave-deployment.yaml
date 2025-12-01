@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.37.0 (fb0539e64)
+  labels:
+    io.kompose.service: db-slave
+  name: db-slave
+  namespace: bootcamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: db-slave
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.37.0 (fb0539e64)
+      labels:
+        io.kompose.service: db-slave
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MYSQL_ROOT_PASSWORD_SLAVE
+        - name: REPLICA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: REPLICA_PASSWORD
+        - name: REPLICA_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: REPLICA_USER
+        envFrom:
+        - configMapRef:
+            name: env
+        image: mysql:8.0
+        livenessProbe:
+          exec:
+            command:
+            - /usr/bin/healthcheck.sh
+          failureThreshold: 20
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 2
+        name: db-slave
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/mysql/my.cnf
+          name: db-slave-cm0
+          subPath: my.cnf
+        - mountPath: /docker-entrypoint-initdb.d
+          name: db-slave-cm1
+        - mountPath: /usr/bin/healthcheck.sh
+          name: db-slave-cm2
+          subPath: healthcheck.sh
+        - mountPath: /etc/mysql/ssl/ca.pem
+          name: db-ca-crt
+          subPath: ca.pem
+        - mountPath: /etc/mysql/ssl/client.crt
+          name: db-slave-crt
+          subPath: client.crt
+        - mountPath: /etc/mysql/ssl/client.key
+          name: db-slave-key
+          subPath: client.key
+        - mountPath: /var/lib/mysql
+          name: data-replica
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          items:
+          - key: replica.cnf
+            path: my.cnf
+          name: db-slave-cm0
+        name: db-slave-cm0
+      - configMap:
+          name: db-slave-cm1
+        name: db-slave-cm1
+      - configMap:
+          defaultMode: 493
+          items:
+          - key: healthcheck.sh
+            path: healthcheck.sh
+          name: db-slave-cm2
+        name: db-slave-cm2
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.pem
+          name: ca.crt
+        name: db-ca-crt
+      - configMap:
+          items:
+          - key: client.crt
+            path: client.crt
+          name: db-slave.crt
+        name: db-slave-crt
+      - secret:
+          items:
+          - key: client.key
+            path: client.key
+          secretName: db-slave.key
+        name: db-slave-key
+      - name: data-replica
+        persistentVolumeClaim:
+          claimName: data-replica

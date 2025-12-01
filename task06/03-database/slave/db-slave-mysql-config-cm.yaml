@@ -1,0 +1,35 @@
+apiVersion: v1
+data:
+  replica.cnf: |
+    [mysqld]
+    server-id=2
+    log_bin=mysql-bin
+    relay_log=mysql-relay-bin
+    read_only=ON
+    gtid_mode=ON
+    enforce_gtid_consistency=ON
+    master_info_repository=TABLE
+    relay_log_info_repository=TABLE
+    relay_log_recovery=ON
+    log_slave_updates=ON
+
+    ssl-ca=/etc/mysql/ssl/ca.pem
+    ssl-cert=/etc/mysql/ssl/client.crt
+    ssl-key=/etc/mysql/ssl/client.key
+
+    # plugin_load_add=semisync_master=semisync_master.so
+    # plugin_load_add=semisync_slave=semisync_slave.so
+    # rpl_semi_sync_slave_enabled=1
+
+    [client]
+    ssl-ca=/etc/mysql/ssl/ca.pem
+    ssl-cert=/etc/mysql/ssl/client.crt
+    ssl-key=/etc/mysql/ssl/client.key
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    io.kompose.service: db-slave
+  name: db-slave-cm0
+  namespace: bootcamp

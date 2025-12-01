@@ -1,0 +1,52 @@
+apiVersion: v1
+data:
+  001-ssl.conf: |
+    <VirtualHost *:80>
+        ServerName bootcamp.portaone.com
+        ServerAlias www.bootcamp.portaone.com
+
+        # Вариант с Redirect
+        Redirect permanent / https://bootcamp.portaone.com/
+
+        # или через mod_rewrite:
+        # RewriteEngine On
+        # RewriteCond %{HTTPS} off
+        # RewriteRule ^/(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    </VirtualHost>
+
+    <VirtualHost *:443>
+        ServerName bootcamp.portaone.com
+        DocumentRoot /var/www/html
+
+        SSLEngine on
+
+        # Server sert
+        SSLCertificateFile      /etc/ssl/certs/server.crt
+
+        # Server private key
+        SSLCertificateKeyFile   /etc/ssl/private/server.key
+
+        # root CA dertificate
+        SSLCACertificateFile    /etc/ssl/certs/ca.crt
+
+        # Cyphers
+        SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1
+        SSLCipherSuite          HIGH:!aNULL:!MD5
+        SSLHonorCipherOrder     on
+
+        # Logs
+        #ErrorLog  ${APACHE_LOG_DIR}/srv1-ssl-error.log
+        #CustomLog ${APACHE_LOG_DIR}/srv1-ssl-access.log combined
+
+        # HSTS
+        Header always set Strict-Transport-Security "max-age=31536000"
+
+    </VirtualHost>
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    io.kompose.service: web
+  name: web-cm1
+  namespace: bootcamp

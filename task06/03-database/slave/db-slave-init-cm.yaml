@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  01-replica.sh: |
+    #!/bin/bash
+
+    SQL=$(cat <<EOF
+    CHANGE REPLICATION SOURCE TO
+      SOURCE_HOST='${DB_MASTER_HOST}',
+      SOURCE_USER='${REPLICA_USER}',
+      SOURCE_PASSWORD='${REPLICA_PASSWORD}',
+      GET_MASTER_PUBLIC_KEY=1,
+      SOURCE_AUTO_POSITION=1;
+    START REPLICA;
+    SHOW REPLICA STATUS\G
+    EOF
+    )
+
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "$SQL"
+
+    if [[ $? -eq 0 ]]; then
+      echo "User '$REPLICA_USER' created."
+    else
+      echo "Error. User '$REPLICA_USER' not created."
+      exit 2
+    fi
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: db-slave
+  name: db-slave-cm1
+  namespace: bootcamp
