@@ -1,0 +1,11 @@
+-t nat -N MINIKUBE
+-t nat -A MINIKUBE -i ens18 -p tcp -m tcp --dport 9090 -j DNAT --to-destination 192.168.49.2:30090
+-t nat -A MINIKUBE -i ens18 -p tcp -m tcp --dport 443 -j DNAT --to-destination 192.168.49.2:30443
+-t nat -A MINIKUBE -i ens18 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.49.2:30080
+-t nat -A PREROUTING -i ens18 -p tcp -j MINIKUBE
+
+-N MINIKUBE
+-A MINIKUBE -d 192.168.49.2/32 -p tcp -m tcp --dport 30090 -j ACCEPT
+-A MINIKUBE -d 192.168.49.2/32 -p tcp -m tcp --dport 30443 -j ACCEPT
+-A MINIKUBE -d 192.168.49.2/32 -p tcp -m tcp --dport 30080 -j ACCEPT
+-A FORWARD -d 192.168.49.2/32 -p tcp -j MINIKUBE
